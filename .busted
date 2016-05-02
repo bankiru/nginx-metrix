@@ -1,0 +1,15 @@
+return {
+    _all = {
+        coverage = true,
+        ROOT = {"tests"},
+        ['sort-files'] = true,
+    },
+    default = {
+        verbose = true,
+        output = 'utfTerminal'
+    },
+    ci = {
+        verbose = true,
+        output = 'junit'
+    },
+}

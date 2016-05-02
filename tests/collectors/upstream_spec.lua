@@ -1,0 +1,63 @@
+require('tests.bootstrap')(assert)
+
+describe('collectors.upstream', function()
+    local collector
+
+    setup(function()
+        package.loaded['nginx-metrix.collectors.upstream'] = nil
+        collector = require 'nginx-metrix.collectors.upstream'
+        collector.storage = mock({safe_incr = function() end}, true)
+    end)
+
+    teardown(function()
+        collector = nil
+        package.loaded['nginx-metrix.collectors.upstream'] = nil
+        _G.ngx = nil
+    end)
+
+    after_each(function()
+        mock.clear(collector.storage)
+    end)
+
+    -- tests
+    it('valid structure', function()
+        assert.is_equal('upstream', collector.name)
+        assert.is_table(collector.fields)
+        assert.is_table(collector.fields.count)
+        assert.is_table(collector.fields.connect_time)
+        assert.is_table(collector.fields.header_time)
+        assert.is_table(collector.fields.response_time)
+
+        assert.is_table(collector.ngx_phases)
+        assert.is_function(collector.on_phase)
+    end)
+
+    it('handles phase log skipped', function()
+        _G.ngx = {
+            var = {
+                upstream_addr = nil,
+            },
+        }
+        collector:on_phase('log')
+
+        assert.spy(collector.storage.safe_incr).was_not.called()
+    end)
+
+    it('handles phase log', function()
+        _G.ngx = {
+            var = {
+                upstream_addr = '127.0.0.1',
+                upstream_connect_time = 1,
+                upstream_header_time = 2,
+                upstream_response_time = 3
+            },
+        }
+        collector:on_phase('log')
+
+        assert.spy(collector.storage.safe_incr).was.called_with(collector.storage, 'count')
+        assert.spy(collector.storage.safe_incr).was.called_with(collector.storage, 'connect_time', 1)
+        assert.spy(collector.storage.safe_incr).was.called_with(collector.storage, 'header_time', 2)
+        assert.spy(collector.storage.safe_incr).was.called_with(collector.storage, 'response_time', 3)
+        assert.spy(collector.storage.safe_incr).was.called(4)
+    end)
+end)

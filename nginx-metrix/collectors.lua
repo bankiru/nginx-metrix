@@ -75,6 +75,16 @@ local collector_extend = function(collector)
             self:on_phase(phase)
         end,
 
+        periodically = function(self)
+            iter(self.fields):each(function(field, params)
+                if params.mean then
+                    self.storage:mean_flush(field)
+                elseif params.cyclic then
+                    self.storage:cyclic_flush(field)
+                end
+            end)
+        end,
+
         get_raw_stats = function(self)
             return iter(self.fields):map(function(k, _)
                 return k, (self.storage:get(k) or 0)

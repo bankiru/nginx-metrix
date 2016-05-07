@@ -136,6 +136,47 @@ wrapper_metatable.safe_incr = function(self, key, value)
 end
 
 ---
+-- @param key string
+-- @param value number
+-- @return mixed
+---
+wrapper_metatable.mean_add = function(self, key, value)
+    key = self:prepare_key(key)
+    local prev_value, counter = storage_dict.get(key)
+    value = (prev_value * counter + value) / (counter + 1)
+    return storage_dict.set(key, value, nil, counter + 1)
+end
+
+---
+-- @param key string
+---
+wrapper_metatable.mean_flush = function(self, key)
+    key = self:prepare_key(key)
+    storage_dict.set(key, (storage_dict.get(key) or 0), nil, 0)
+end
+
+---
+-- @param key string
+-- @param value number
+-- @return mixed
+---
+wrapper_metatable.cyclic_incr = function(self, key, value)
+    return storage_dict.safe_incr(self:prepare_key(key) .. '^^next^^', value)
+end
+
+---
+-- @param key string
+---
+wrapper_metatable.cyclic_flush = function(self, key)
+    key = self:prepare_key(key)
+    local next_key = key .. '^^next^^'
+    local next_value = storage_dict.get(next_key) or 0
+    storage_dict.delete(next_key)
+    storage_dict.set(key, next_value)
+end
+
+wrapper_metatable.aaa = function() print('AAAAAAAAAAA') end
+---
 --
 --wrapper_metatable.flush_all = function()
 --    each(function(k) self:delete(k) end, self:get_keys())

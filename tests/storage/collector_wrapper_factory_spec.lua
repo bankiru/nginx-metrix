@@ -146,4 +146,20 @@ describe('storage.collector_wrapper_factory', function()
         wrapper_metatable:safe_incr('test-key', 13)
         assert.spy(dict_mock.safe_incr).was.called_with('collector_mock¦test-key', 13)
     end)
+
+    it('wrapper_metatable.mean_add', function()
+        pending('Not implemented yet')
+    end)
+
+    it('wrapper_metatable.mean_flush', function()
+        pending('Not implemented yet')
+    end)
+
+    it('wrapper_metatable.cyclic_incr', function()
+        pending('Not implemented yet')
+    end)
+
+    it('wrapper_metatable.cyclic_flush', function()
+        pending('Not implemented yet')
+    end)
 end)

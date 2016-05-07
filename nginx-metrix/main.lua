@@ -14,6 +14,7 @@ require 'nginx-metrix.lib.is'()
 local namespaces = require 'nginx-metrix.storage.namespaces'
 local collectors = require 'nginx-metrix.collectors'
 local listener   = require 'nginx-metrix.listener'
+local scheduler  = require 'nginx-metrix.scheduler'
 local output     = require 'nginx-metrix.output.renderer'
 
 --------------------------------------------------------------------------------
@@ -28,6 +29,7 @@ local register_collector = function(collector)
     collector = collectors.register(collector)
 
     listener.attach_collector(collector)
+    scheduler.attach_collector(collector)
 end
 
 ---
@@ -57,6 +59,15 @@ local handle_ngx_phase = function(phase)
 end
 
 --------------------------------------------------------------------------------
+-- Scheduler
+--------------------------------------------------------------------------------
+---
+--
+local init_scheduler = function()
+    scheduler.start()
+end
+
+--------------------------------------------------------------------------------
 -- Output
 --------------------------------------------------------------------------------
 ---
@@ -82,6 +93,7 @@ exports.version = version
 exports.register_collector = register_collector
 exports.register_builtin_collectors = register_builtin_collectors
 exports.handle_ngx_phase = handle_ngx_phase
+exports.init_scheduler = init_scheduler
 exports.show = show
 
 if __TEST__ then

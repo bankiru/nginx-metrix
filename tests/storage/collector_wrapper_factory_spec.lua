@@ -148,7 +148,15 @@ describe('storage.collector_wrapper_factory', function()
     end)
 
     it('wrapper_metatable.mean_add', function()
-        pending('Not implemented yet')
+        local wrapper_metatable = mk_wrapper_metatable_mock('collector-mock')
+
+        stub.new(dict_mock, 'get').on_call_with('collector_mock¦test-key').returns(nil, 0)
+
+        wrapper_metatable:mean_add('test-key', 13)
+        assert.spy(dict_mock.get).was.called_with('collector_mock¦test-key')
+        assert.spy(dict_mock.set).was.called_with('collector_mock¦test-key', 13, nil, 1)
+
+        dict_mock.get:revert()
     end)
 
     it('wrapper_metatable.mean_flush', function()

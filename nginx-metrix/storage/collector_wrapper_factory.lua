@@ -143,7 +143,7 @@ end
 wrapper_metatable.mean_add = function(self, key, value)
     key = self:prepare_key(key)
     local prev_value, counter = storage_dict.get(key)
-    value = (prev_value * counter + value) / (counter + 1)
+    value = ((prev_value or 0) * counter + value) / (counter + 1)
     return storage_dict.set(key, value, nil, counter + 1)
 end
 
@@ -175,7 +175,6 @@ wrapper_metatable.cyclic_flush = function(self, key)
     storage_dict.set(key, next_value)
 end
 
-wrapper_metatable.aaa = function() print('AAAAAAAAAAA') end
 ---
 --
 --wrapper_metatable.flush_all = function()

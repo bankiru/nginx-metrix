@@ -152,7 +152,11 @@ end
 ---
 wrapper_metatable.mean_flush = function(self, key)
     key = self:prepare_key(key)
-    storage_dict.set(key, (storage_dict.get(key) or 0), nil, 0)
+    local prev_value, counter = storage_dict.get(key)
+    if counter > 0 then
+        counter = 1
+    end
+    storage_dict.set(key, (prev_value or 0), nil, counter)
 end
 
 ---

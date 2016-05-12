@@ -18,18 +18,20 @@ handler = function (premature, collectors)
         return
     end
 
-    collectors:map(
-        function(collector)
-            return collector, ngx.thread.spawn(function() collector:periodically() end)
-        end
-    ):each(
-        function(collector, thread)
-            local ok, res = ngx.thread.wait(thread)
-            if not ok then
-                logger.error(("failed to run Collector<%s>:periodically(): %s"):format(collector.name, res))
+    if length(collectors) > 0 then
+        iter(collectors):map(
+            function(collector)
+                return collector, ngx.thread.spawn(function() collector:periodically() end)
             end
-        end
-    )
+        ):each(
+            function(collector, thread)
+                local ok, res = ngx.thread.wait(thread)
+                if not ok then
+                    logger.error(("failed to run Collector<%s>:periodically(): "):format(collector.name), res)
+                end
+            end
+        )
+    end
 
     local ok, err = ngx.timer.at(delay, handler, collectors)
     if not ok then
@@ -39,13 +41,14 @@ handler = function (premature, collectors)
 end
 
 ---
---
+-- @return bool
 local start = function()
-    local ok, err = ngx.timer.at(delay, handler, iter(collectors))
+    local ok, err = ngx.timer.at(delay, handler, collectors)
     if not ok then
         logger.error("Failed to start the scheduler - failed to create the timer: ", err)
-        return
+        return false
     end
+    return true
 end
 
 --------------------------------------------------------------------------------

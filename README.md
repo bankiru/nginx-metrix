@@ -1,7 +1,7 @@
 Nginx Metrix
 ============
 
-Nginx metrics written on lua and works with nginx-lua-module
+Nginx metrics written on lua and works on top of nginx-lua-module
 
 Usage
 -----
@@ -9,20 +9,20 @@ Usage
 Put into `http` section
 
 ```
-include /etc/nginx/metrics/http.conf;
+include /etc/nginx/metrix/http.conf;
 ```
 
 Put into `server` section
 
 ```
-include /etc/nginx/metrics/counter.conf;
-include /etc/nginx/metrics/metrics-default-location.conf;
+include /etc/nginx/metrix/counter.conf;
+include /etc/nginx/metrix/metrics-default-location.conf;
 ```
 
 Unit Tests
 ----------
 
-`/usr/local/bin/busted -c -v -o utfTerminal -- tests`
+Run `busted` (http://olivinelabs.com/busted/)
 
 TODO
 ----

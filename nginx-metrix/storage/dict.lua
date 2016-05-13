@@ -48,7 +48,7 @@ end
 ---
 local get = function(key)
     local value, flags = exports._shared:get(normalize_key(key))
-    return serializer.unserialize(value), flags
+    return serializer.unserialize(value), (flags or 0)
 end
 
 ---
@@ -57,7 +57,7 @@ end
 ----
 local get_stale = function(key)
     local value, flags, stale = exports._shared:get_stale(normalize_key(key))
-    return serializer.unserialize(value), flags, stale
+    return serializer.unserialize(value), (flags or 0), stale
 end
 
 ---
@@ -68,7 +68,7 @@ end
 -- @return mixed
 ---
 local set = function(key, value, exptime, flags)
-    return exports._shared:set(normalize_key(key), serializer.serialize(value), exptime, flags)
+    return exports._shared:set(normalize_key(key), serializer.serialize(value), exptime or 0, flags or 0)
 end
 
 ---
@@ -79,7 +79,7 @@ end
 -- @return mixed
 ---
 local safe_set = function(key, value, exptime, flags)
-    return exports._shared:safe_set(normalize_key(key), serializer.serialize(value), exptime, flags)
+    return exports._shared:safe_set(normalize_key(key), serializer.serialize(value), exptime or 0, flags or 0)
 end
 
 ---
@@ -90,7 +90,7 @@ end
 -- @return mixed
 ---
 local add = function(key, value, exptime, flags)
-    return exports._shared:add(normalize_key(key), serializer.serialize(value), exptime, flags)
+    return exports._shared:add(normalize_key(key), serializer.serialize(value), exptime or 0, flags or 0)
 end
 
 ---
@@ -101,7 +101,7 @@ end
 -- @return mixed
 ---
 local safe_add = function(key, value, exptime, flags)
-    return exports._shared:safe_add(normalize_key(key), serializer.serialize(value), exptime, flags)
+    return exports._shared:safe_add(normalize_key(key), serializer.serialize(value), exptime or 0, flags or 0)
 end
 
 ---
@@ -112,7 +112,7 @@ end
 -- @return mixed
 ---
 local replace = function(key, value, exptime, flags)
-    return exports._shared:replace(normalize_key(key), serializer.serialize(value), exptime, flags)
+    return exports._shared:replace(normalize_key(key), serializer.serialize(value), exptime or 0, flags or 0)
 end
 
 ---

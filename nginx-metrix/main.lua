@@ -36,7 +36,7 @@ end
 --
 local register_builtin_collectors = function()
     builtin_collectors:each(function(name)
-        local collector = require('metrix.collectors.' .. name)
+        local collector = require('nginx-metrix.collectors.' .. name)
         register_collector(collector)
     end)
 end

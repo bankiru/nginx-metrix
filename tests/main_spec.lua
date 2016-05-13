@@ -1,13 +1,13 @@
 require('tests.bootstrap')(assert)
 
-describe('metrix collector statuses tests : ', function()
+describe('main', function()
     local metrix
 
     local ngx_mock = require 'tests.ngx_mock'()
 
     local match = require 'luassert.match'
 
-    local function eq_json(state, arguments)
+    local function eq_json(_, arguments)
         return function(value)
             local json = require 'nginx-metrix.lib.json'
             local util = require 'luassert.util'

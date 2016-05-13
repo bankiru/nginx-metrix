@@ -156,7 +156,7 @@ wrapper_metatable.mean_flush = function(self, key)
     if counter > 0 then
         counter = 1
     end
-    storage_dict.set(key, (prev_value or 0), nil, counter)
+    storage_dict.set(key, (prev_value or 0), 0, counter)
 end
 
 ---
@@ -176,44 +176,8 @@ wrapper_metatable.cyclic_flush = function(self, key)
     local next_key = key .. '^^next^^'
     local next_value = storage_dict.get(next_key) or 0
     storage_dict.delete(next_key)
-    storage_dict.set(key, next_value)
+    storage_dict.set(key, next_value, 0, 0)
 end
-
----
---
---wrapper_metatable.flush_all = function()
---    each(function(k) self:delete(k) end, self:get_keys())
---end
-
----
---
---wrapper_metatable.flush_expired = function()
---    return storage_dict.flush_expired()
---end
-
----
--- @return table
----
---wrapper_metatable.get_keys = function()
---    local keys = iter(storage_dict.get_keys())
---
---    if not is_null(keys) then
---        local key_prefix = prepare_key('')
---
---        keys = keys:filter(
---            function(k)
---                return k ~= namespaces_list_key and (key_prefix == '' or k:sub(1,key_prefix:len()) == key_prefix)
---            end
---        ):map(
---            function(k)
---                return k:sub(key_prefix:len()+1)
---            end
---        )
---    end
---
---    return keys:totable()
---end
-
 
 ---
 -- Factory method

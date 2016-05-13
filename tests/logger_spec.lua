@@ -7,7 +7,7 @@ describe('logger', function()
     setup(function()
         local ngx = {
             log = function() end,
-            ERROR = 'ERROR',
+            ERR = 'ERROR',
             STDERR = 'STDERR'
         }
         _G.ngx = mock(ngx, true)
@@ -32,8 +32,8 @@ describe('logger', function()
         assert.spy(_G.ngx.log).was.called_with('ERROR', 'msg')
     end)
 
-    it('stderror', function()
-        logger.stderror('msg')
+    it('stderr', function()
+        logger.stderr('msg')
         assert.spy(_G.ngx.log).was.called_with('STDERR', 'msg')
     end)
 

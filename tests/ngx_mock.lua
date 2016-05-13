@@ -32,7 +32,7 @@ local reset = function()
     _G.ngx = copy(ngx_origin)
 end
 
-local define_shared_dict = function(name)
+local create_shared_dict = function()
     local function assert_key(key)
         assert(type(key) == 'string', ('Invalid key type; Expected string; Got %s'):format(type(key)))
         assert(key ~= '', 'key is empty')
@@ -153,13 +153,18 @@ local define_shared_dict = function(name)
     local dict = {}
     setmetatable(dict, shared_dict_meta_table)
 
-    ngx.shared[name] = dict
-
     return dict
+end
+
+local define_shared_dict = function(name)
+    ngx.shared[name] = create_shared_dict()
+
+    return ngx.shared[name]
 end
 
 local exports = {}
 exports.reset = reset
+exports.create_shared_dict = create_shared_dict
 exports.define_shared_dict = define_shared_dict
 
 setmetatable(exports, {

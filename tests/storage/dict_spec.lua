@@ -1,36 +1,37 @@
 require('tests.bootstrap')(assert)
 
 describe('storage.dict', function()
-    local dict = require 'nginx-metrix.storage.dict'
-    local ngx_mock = require 'tests.ngx_mock'()
-    local match = require 'luassert.match'
+    local dict
+    local logger
+    local match
 
-    local mk_test_dict = function(name)
-        local shared_dict = ngx_mock.define_shared_dict(name or 'test-dict')
+    local mk_test_dict = function()
+        local shared_dict = mock({});
         dict.init({shared_dict = shared_dict})
-
         return shared_dict
     end
 
     setup(function()
-        package.loaded['nginx-metrix.storage.dict'] = nil
-        ngx_mock.reset()
-    end)
-
-    teardown(function()
-        ngx_mock.reset()
-    end)
-
-    before_each(function()
-        ngx_mock.reset()
+        match = require 'luassert.match'
+        logger = mock(require 'nginx-metrix.logger', true)
         dict = require 'nginx-metrix.storage.dict'
     end)
 
-    after_each(function()
+    teardown(function()
+        package.loaded['nginx-metrix.logger'] = nil
         package.loaded['nginx-metrix.storage.dict'] = nil
     end)
 
+    before_each(function()
+    end)
+
+    after_each(function()
+        mock.clear(logger)
+        _G.ngx = nil
+    end)
+
     it('init failed on wrong shared_dict name', function()
+        _G.ngx = {shared = {}}
         assert.has_error(
             function()
                 dict.init({shared_dict = 'non-existent-shared-dict'})
@@ -49,7 +50,7 @@ describe('storage.dict', function()
     end)
 
     it('init by shared_dict instance', function()
-        local shared_dict = ngx_mock.define_shared_dict('test-dict')
+        local shared_dict = {}
 
         assert.has_no.errors(function()
             dict.init({shared_dict = shared_dict})
@@ -64,10 +65,10 @@ describe('storage.dict', function()
     end)
 
     it('init by name', function()
-        ngx_mock.define_shared_dict('test-dict')
+        _G.ngx = {shared = {testdict = {}}}
 
         assert.has_no.errors(function()
-            dict.init({shared_dict = 'test-dict'})
+            dict.init({shared_dict = 'testdict'})
         end)
 
         assert.is_table(dict._shared)
@@ -95,180 +96,210 @@ describe('storage.dict', function()
     end)
 
     it('get', function()
-        local shared_dict = mk_test_dict()
+        local test_key = 'get-test-key'
+        local test_value = 'get-test-value'
 
-        shared_dict:set('get-test-key', 'get-test-value')
+        local shared_dict = mk_test_dict('get')
+        stub.new(shared_dict, 'get').on_call_with(shared_dict, test_key).returns(test_value, nil)
 
-        spy.on(shared_dict, 'get')
-        local actual_value, actual_flags = dict.get('get-test-key')
-        assert.spy(shared_dict.get).was_called_with(shared_dict, 'get-test-key')
-        assert.are.equal('get-test-value', actual_value)
+        local actual_value, actual_flags = dict.get(test_key)
+        assert.spy(shared_dict.get).was.called_with(shared_dict, test_key)
+        assert.spy(shared_dict.get).was_called(1)
+        assert.are.equal(test_value, actual_value)
         assert.are.equal(0, actual_flags)
     end)
 
     it('get_stale', function()
+        local test_key = 'get_stale-test-key'
+        local test_value = 'get_stale-test-value'
+
         local shared_dict = mk_test_dict()
+        stub.new(shared_dict, 'get_stale').on_call_with(shared_dict, test_key).returns(test_value, nil, false)
 
-        shared_dict:set('get_stale-test-key', 'get_stale-test-value')
-
-        spy.on(shared_dict, 'get_stale')
-        local actual_value, actual_flags, actual_stale = dict.get_stale('get_stale-test-key')
-        assert.spy(shared_dict.get_stale).was_called_with(shared_dict, 'get_stale-test-key')
-        assert.are.equal('get_stale-test-value', actual_value)
+        local actual_value, actual_flags, actual_stale = dict.get_stale(test_key)
+        assert.spy(shared_dict.get_stale).was_called_with(shared_dict, test_key)
+        assert.spy(shared_dict.get_stale).was_called(1)
+        assert.are.equal(test_value, actual_value)
         assert.are.equal(0, actual_flags)
         assert.is_false(actual_stale)
     end)
 
     it('set', function()
-        local shared_dict = mk_test_dict()
-        local _ = match._
+        local test_key = 'set-test-key'
+        local test_value = 'set-test-value'
 
-        spy.on(shared_dict, 'set')
-        local result = dict.set('set-test-key', 'set-test-value')
-        assert.spy(shared_dict.set).was.called_with(_, 'set-test-key', 'set-test-value', _, _)
-        assert.spy(shared_dict.set).was.returned_with(true, nil, false)
-        assert.is_true(result)
+        local shared_dict = mk_test_dict()
+        stub.new(shared_dict, 'set').on_call_with(shared_dict, test_key, test_value, 0, 0).returns(true, nil, false)
+
+        local success, err, forcible = dict.set(test_key, test_value)
+        assert.spy(shared_dict.set).was_called(1)
+        assert.spy(shared_dict.set).was.called_with(shared_dict, test_key, test_value, 0, 0)
+        assert.is_true(success)
+        assert.is_nil(err)
+        assert.is_false(forcible)
     end)
 
     it('safe_set', function()
-        local shared_dict = mk_test_dict()
-        local _ = match._
+        local test_key = 'safe_set-test-key'
+        local test_value = 'safe_set-test-value'
 
-        spy.on(shared_dict, 'safe_set')
-        local result = dict.safe_set('safe_set-test-key', 'safe_set-test-value')
-        assert.spy(shared_dict.safe_set).was.called_with(_, 'safe_set-test-key', 'safe_set-test-value', _, _)
-        assert.spy(shared_dict.safe_set).was.returned_with(true, nil)
-        assert.is_true(result)
+        local shared_dict = mk_test_dict()
+        stub.new(shared_dict, 'safe_set').on_call_with(shared_dict, test_key, test_value, 0, 0).returns(true, nil)
+
+        local success, err = dict.safe_set(test_key, test_value)
+        assert.spy(shared_dict.safe_set).was_called(1)
+        assert.spy(shared_dict.safe_set).was.called_with(shared_dict, test_key, test_value, 0, 0)
+        assert.is_true(success)
+        assert.is_nil(err)
     end)
 
     it('add', function()
-        local shared_dict = mk_test_dict()
-        local _ = match._
+        local test_key = 'add-test-key'
+        local test_value = 'add-test-value'
 
-        spy.on(shared_dict, 'add')
-        local result = dict.add('add-test-key', 'add-test-value')
-        assert.spy(shared_dict.add).was.called_with(_, 'add-test-key', 'add-test-value', _, _)
-        assert.spy(shared_dict.add).was.returned_with(true, nil, false)
-        assert.is_true(result)
+        local shared_dict = mk_test_dict()
+        stub.new(shared_dict, 'add').on_call_with(shared_dict, test_key, test_value, 0, 0).returns(true, nil, false)
+
+        local success, err, forcible = dict.add(test_key, test_value)
+        assert.spy(shared_dict.add).was_called(1)
+        assert.spy(shared_dict.add).was.called_with(shared_dict, test_key, test_value, 0, 0)
+        assert.is_true(success)
+        assert.is_nil(err)
+        assert.is_false(forcible)
     end)
 
     it('safe_add', function()
-        local shared_dict = mk_test_dict()
-        local _ = match._
+        local test_key = 'safe_add-test-key'
+        local test_value = 'safe_add-test-value'
 
-        spy.on(shared_dict, 'safe_add')
-        local result = dict.safe_add('safe_add-test-key', 'safe_add-test-value')
-        assert.spy(shared_dict.safe_add).was.called_with(_, 'safe_add-test-key', 'safe_add-test-value', _, _)
-        assert.spy(shared_dict.safe_add).was.returned_with(true, nil)
-        assert.is_true(result)
+        local shared_dict = mk_test_dict()
+        stub.new(shared_dict, 'safe_add').on_call_with(shared_dict, test_key, test_value, 0, 0).returns(true, nil)
+
+        local success, err = dict.safe_add(test_key, test_value)
+        assert.spy(shared_dict.safe_add).was_called(1)
+        assert.spy(shared_dict.safe_add).was.called_with(shared_dict, test_key, test_value, 0, 0)
+        assert.is_true(success)
+        assert.is_nil(err)
     end)
 
     it('incr failed with not found', function()
-        local shared_dict = mk_test_dict()
-        local _ = match._
+        local test_key = 'incr-test-key'
+        local test_value = 13
 
-        spy.on(shared_dict, 'incr')
-        local result, err = dict.incr('incr-test-key', 1)
-        assert.spy(shared_dict.incr).was.called_with(_, 'incr-test-key', 1)
-        assert.spy(shared_dict.incr).was.returned_with(nil, 'not found')
-        assert.is_nil(result)
-        assert.are.equal('not found', err)
+        local shared_dict = mk_test_dict()
+        stub.new(shared_dict, 'incr').on_call_with(shared_dict, test_key, test_value).returns(false, 'not found')
+
+        local newval, err = dict.incr(test_key, test_value)
+        assert.spy(shared_dict.incr).was_called(1)
+        assert.spy(shared_dict.incr).was.called_with(shared_dict, test_key, test_value)
+        assert.is_false(newval)
+        assert.is_equal('not found', err)
     end)
 
     it('incr', function()
+        local test_key = 'incr-test-key'
+        local test_value = 7
+
         local shared_dict = mk_test_dict()
-        local _ = match._
+        stub.new(shared_dict, 'incr').on_call_with(shared_dict, test_key, test_value).returns(8, nil)
 
-        shared_dict:set('incr-test-key', 1)
-
-        spy.on(shared_dict, 'incr')
-        local result, err = dict.incr('incr-test-key', 1)
-        assert.spy(shared_dict.incr).was.called_with(_, 'incr-test-key', 1)
-        assert.spy(shared_dict.incr).was.returned_with(2, nil)
-        assert.are.equal(2, result)
+        local newval, err = dict.incr(test_key, test_value)
+        assert.spy(shared_dict.incr).was_called(1)
+        assert.spy(shared_dict.incr).was.called_with(shared_dict, test_key, test_value)
+        assert.is_equal(8, newval)
         assert.is_nil(err)
     end)
 
     it('safe_incr', function()
+        local test_key = 'safe_incr-test-key'
+
         local shared_dict = mk_test_dict()
-        local _ = match._
+        stub.new(shared_dict, 'incr').on_call_with(match._, test_key, 1).returns(false, 'not found')
+        stub.new(shared_dict, 'add').on_call_with(shared_dict, test_key, 1, 0, 0).returns(true, nil)
 
-        spy.on(shared_dict, 'add')
-        local result, err = dict.safe_incr('incr-test-key', 2)
-        assert.spy(shared_dict.add).was.called_with(_, 'incr-test-key', 2, _, _)
-        assert.are.equal(2, result)
+        local newval, err = dict.safe_incr(test_key, 1)
+        assert.spy(shared_dict.incr).was.called_with(shared_dict, test_key, 1)
+        assert.spy(shared_dict.add).was.called_with(shared_dict, test_key, 1, 0, 0)
+        assert.spy(shared_dict.incr).was.called(1)
+        assert.spy(shared_dict.add).was.called(1)
+        assert.are.equal(1, newval)
+        assert.is_nil(err)
+        mock.clear(shared_dict)
+
+        stub.new(shared_dict, 'incr').on_call_with(shared_dict, test_key, 2).returns(3, nil)
+        local newval, err = dict.safe_incr(test_key, 2)
+        assert.spy(shared_dict.incr).was.called_with(shared_dict, test_key, 2)
+        assert.are.equal(3, newval)
         assert.is_nil(err)
 
-        spy.on(shared_dict, 'incr')
-        local result, err = dict.safe_incr('incr-test-key', 2)
-        assert.spy(shared_dict.incr).was.called_with(_, 'incr-test-key', 2)
-        assert.are.equal(4, result)
-        assert.is_nil(err)
+        assert.spy(shared_dict.incr).was.called(1)
+        assert.spy(shared_dict.add).was_not.called()
+        mock.clear(shared_dict)
     end)
 
     it('replace failed with not found', function()
-        local shared_dict = mk_test_dict()
-        local _ = match._
+        local test_key = 'replace-test-key'
+        local test_value = 13
 
-        spy.on(shared_dict, 'replace')
-        local result, err = dict.replace('replace-test-key', 'replace-test-value')
-        assert.spy(shared_dict.replace).was.called_with(_, 'replace-test-key', 'replace-test-value', _, _)
-        assert.spy(shared_dict.replace).was.returned_with(false, 'not found')
-        assert.is_false(result)
-        assert.are.equal('not found', err)
+        local shared_dict = mk_test_dict()
+        stub.new(shared_dict, 'replace').on_call_with(shared_dict, test_key, test_value, 0, 0).returns(false, 'not found', nil)
+
+        local success, err, forcible = dict.replace(test_key, test_value)
+        assert.spy(shared_dict.replace).was_called(1)
+        assert.spy(shared_dict.replace).was.called_with(shared_dict, test_key, test_value, 0, 0)
+        assert.is_false(success)
+        assert.is_equal('not found', err)
+        assert.is_nil(forcible)
     end)
 
     it('replace', function()
+        local test_key = 'replace-test-key'
+        local test_value = 7
+
         local shared_dict = mk_test_dict()
-        local _ = match._
+        stub.new(shared_dict, 'replace').on_call_with(shared_dict, test_key, test_value, 0, 0).returns(true, nil, false)
 
-        shared_dict:set('replace-test-key', 'previous')
-
-        spy.on(shared_dict, 'replace')
-        local result, err = dict.replace('replace-test-key', 'replace-test-value')
-        assert.spy(shared_dict.replace).was.called_with(_, 'replace-test-key', 'replace-test-value', _, _)
-        assert.spy(shared_dict.replace).was.returned_with(true, nil, false)
-        assert.is_true(result)
+        local success, err, forcible = dict.replace(test_key, test_value)
+        assert.spy(shared_dict.replace).was_called(1)
+        assert.spy(shared_dict.replace).was.called_with(shared_dict, test_key, test_value, 0, 0)
+        assert.is_true(success)
         assert.is_nil(err)
-        local actual_value = shared_dict:get('replace-test-key')
-        assert.are.equal('replace-test-value', actual_value)
+        assert.is_false(forcible)
     end)
 
     it('delete', function()
+        local test_key = 'delete-test-key'
+
         local shared_dict = mk_test_dict()
-        local _ = match._
+        stub.new(shared_dict, 'delete')
 
-        shared_dict:set('delete-test-key', 'delete-test-value')
-
-        spy.on(shared_dict, 'delete')
-        dict.delete('delete-test-key')
-        assert.spy(shared_dict.delete).was.called_with(_, 'delete-test-key')
-        local actual_value = shared_dict:get('delete-test-key')
-        assert.is_nil(actual_value)
+        dict.delete(test_key)
+        assert.spy(shared_dict.delete).was_called(1)
+        assert.spy(shared_dict.delete).was.called_with(shared_dict, test_key)
     end)
 
     it('flush_all', function()
         local shared_dict = mk_test_dict()
 
-        spy.on(shared_dict, 'flush_expired')
-        dict.flush_expired()
-        assert.spy(shared_dict.flush_expired).was.called()
+        stub.new(shared_dict, 'flush_all')
+        dict.flush_all()
+        assert.spy(shared_dict.flush_all).was.called(1)
     end)
 
     it('flush_expired', function()
         local shared_dict = mk_test_dict()
 
-        spy.on(shared_dict, 'flush_expired')
+        stub.new(shared_dict, 'flush_expired')
         dict.flush_expired()
-        assert.spy(shared_dict.flush_expired).was.called()
+        assert.spy(shared_dict.flush_expired).was.called(1)
     end)
 
     it('get_keys', function()
         local shared_dict = mk_test_dict()
 
-        spy.on(shared_dict, 'get_keys')
+        stub.new(shared_dict, 'get_keys')
         dict.get_keys()
-        assert.spy(shared_dict.get_keys).was.called()
+        assert.spy(shared_dict.get_keys).was.called(1)
     end)
 
 end)

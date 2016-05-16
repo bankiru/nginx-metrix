@@ -19,6 +19,11 @@ include /etc/nginx/metrix/counter.conf;
 include /etc/nginx/metrix/metrics-default-location.conf;
 ```
 
+Contributing
+------------
+
+See CONTRIBUTING.md. All issues, suggestions, and most importantly pull requests are welcome.
+
 Unit Tests
 ----------
 

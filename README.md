@@ -24,8 +24,7 @@ Unit Tests
 
 Run `busted` (http://olivinelabs.com/busted/)
 
-TODO
-----
+Licence
+-------
 
-- [ ] Travis-CI (https://github.com/moteus/lua-travis-example)
-- [ ] Coveralls (https://github.com/moteus/luacov-coveralls) `luacov-coveralls -v --dryrun -i './metrix/*'`
+Copyright 2016 Banki.ru News Agency, Ltd. MIT licensed. See LICENSE for details.

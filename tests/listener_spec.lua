@@ -11,6 +11,7 @@ describe('listener', function()
 
     after_each(function()
         package.loaded['nginx-metrix.listener'] = nil
+        _G.ngx = nil
     end)
 
     it('attach_collector failed on invalid collector', function()
@@ -41,7 +42,7 @@ describe('listener', function()
         )
     end)
 
-    it('handle_phase', function()
+    it('handle_phase with passed phase name', function()
         local collector = mock({
             name = 'test-collector',
             ngx_phases = { [[log]] },
@@ -51,6 +52,23 @@ describe('listener', function()
         assert.has_no.errors(function()
             listener.attach_collector(collector)
             listener.handle_phase('log')
+        end)
+
+        assert.spy(collector.handle_ngx_phase).was.called_with(collector, 'log')
+    end)
+
+    it('handle_phase without passed phase name', function()
+        local collector = mock({
+            name = 'test-collector',
+            ngx_phases = { [[log]] },
+            handle_ngx_phase = function() end
+        })
+
+        _G.ngx = {get_phase = function() return 'log' end}
+
+        assert.has_no.errors(function()
+            listener.attach_collector(collector)
+            listener.handle_phase()
         end)
 
         assert.spy(collector.handle_ngx_phase).was.called_with(collector, 'log')

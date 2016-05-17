@@ -38,7 +38,7 @@ Put into every `server` section
 
 ```
 log_by_lua_block {
-    metrix.handle_ngx_phase('log')
+    metrix.handle_ngx_phase()
 }
 ```
 

@@ -32,6 +32,8 @@ end
 -- @param phase string
 ---
 local handle_phase = function(phase)
+    phase = phase or ngx.get_phase()
+
     assert(
         type(phase) == 'string' and index(phase, phases) ~= nil,
         ('Invalid ngx phase %s (%s)'):format(inspect(phase), type(phase))

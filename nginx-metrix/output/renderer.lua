@@ -1,19 +1,19 @@
 local json = require 'nginx-metrix.lib.json'
 local output_helper = require 'nginx-metrix.output.helper'
-local namespaces_module = require 'nginx-metrix.storage.namespaces'
+local namespaces = require 'nginx-metrix.storage.namespaces'
 local collectors = require 'nginx-metrix.collectors'
 local lust = require 'Lust'
 
-local get_vhosts_json = function(namespaces)
-    return json.encode(namespaces:totable())
+local get_vhosts_json = function(vhosts)
+    return json.encode(vhosts:totable())
 end
 
-local get_stats_json = function(namespaces)
+local get_stats_json = function(vhosts)
     local stats = {}
-    namespaces:each(function(namespace)
-        namespaces_module.activate(namespace)
+    vhosts:each(function(vhost)
+        namespaces.activate(vhost)
 
-        stats[namespace] = collectors.all:reduce(
+        stats[vhost] = collectors.all:reduce(
             function(stats, collector)
                 if is.callable(collector.get_raw_stats) then
                     stats[collector.name] = collector:get_raw_stats():tomap()
@@ -22,13 +22,13 @@ local get_stats_json = function(namespaces)
             end,
             {}
         )
-        stats[namespace].vhost = namespace
+        stats[vhost].vhost = vhost
 
-        namespaces_module.reset_active()
+        namespaces.reset_active()
     end)
 
-    if namespaces:length() == 1 then
-        stats = stats[namespaces:head()] or {}
+    if vhosts:length() == 1 then
+        stats = stats[vhosts:head()] or {}
     end
 
     stats['service'] = 'nginx-metrix'
@@ -36,34 +36,34 @@ local get_stats_json = function(namespaces)
     return json.encode(stats)
 end
 
-local get_vhosts_text = function(namespaces)
-    return namespaces:reduce(
-        function(str, namespace)
-            return str .. "\n\t- " .. namespace
+local get_vhosts_text = function(vhosts)
+    return vhosts:reduce(
+        function(str, vhost)
+            return str .. "\n\t- " .. vhost
         end,
         'vhosts:'
     )
 end
 
-local get_stats_text = function(namespaces)
+local get_stats_text = function(vhosts)
     local text = output_helper.text
-    local stats = namespaces:reduce(
-        function(namespace_stats, namespace)
-            namespaces_module.activate(namespace)
+    local stats = vhosts:reduce(
+        function(stats, vhost)
+            namespaces.activate(vhost)
 
-            namespace_stats = collectors.all:reduce(
+            stats = collectors.all:reduce(
                 function(collector_stats, collector)
                     if is.callable(collector.get_text_stats) then
-                        collector_stats = collector_stats .. text.section_template(collector:get_text_stats(text)):gen{namespace=namespace, collector=collector.name}
+                        collector_stats = collector_stats .. text.section_template(collector:get_text_stats(text)):gen{namespace= vhost, collector=collector.name}
                     end
                     return collector_stats
                 end,
-                namespace_stats
+                stats
             )
 
-            namespaces_module.reset_active()
+            namespaces.reset_active()
 
-            return namespace_stats
+            return stats
         end,
         ''
     )
@@ -71,21 +71,21 @@ local get_stats_text = function(namespaces)
     return text.header() .. stats
 end
 
-local get_vhosts_html = function(namespaces)
+local get_vhosts_html = function(vhosts)
     return output_helper.html.page_template(
         output_helper.html.section_template(
-            lust{[[<ul class="list-group">@map{ vhost=vhosts }:{{<li class="list-group-item">$vhost</li>}}</ul>]]}:gen{vhosts=namespaces:totable()}
+            lust{[[<ul class="list-group">@map{ vhost=vhosts }:{{<li class="list-group-item">$vhost</li>}}</ul>]]}:gen{vhosts=vhosts:totable()}
         ):gen{name='vhosts'}
     ):gen{}
 end
 
-local get_stats_html = function(namespaces)
-    local is_many_namespaces = namespaces:length() > 1
+local get_stats_html = function(vhosts)
+    local is_many_vhosts = vhosts:length() > 1
     local html = output_helper.html
 
-    local content = namespaces:reduce(
-        function(namespace_stats, namespace)
-            namespaces_module.activate(namespace)
+    local content = vhosts:reduce(
+        function(vhost_stats, vhost)
+            namespaces.activate(vhost)
 
             local collectors_stats = collectors.all:reduce(
                 function(collector_stats, collector)
@@ -97,13 +97,13 @@ local get_stats_html = function(namespaces)
                 ''
             )
 
-            if is_many_namespaces then
-                collectors_stats = html.section_template(collectors_stats):gen{name=namespace, class='primary'}
+            if is_many_vhosts then
+                collectors_stats = html.section_template(collectors_stats):gen{name= vhost, class='primary'}
             end
 
-            namespaces_module.reset_active()
+            namespaces.reset_active()
 
-            return namespace_stats .. collectors_stats
+            return vhost_stats .. collectors_stats
         end,
         ''
     )
@@ -111,33 +111,71 @@ local get_stats_html = function(namespaces)
     return html.page_template(content):gen{}
 end
 
-local render = function()
-    local namespaces = iter(namespaces_module.list())
-
-    local content = ''
+local render_vhosts = function(vhosts)
     local format = output_helper.get_format()
 
-    local list_vhosts = ngx.req.get_uri_args().list_vhosts ~= nil
-    if list_vhosts then
-        if format == 'json' then
-            content = get_vhosts_json(namespaces)
-        elseif format == 'text' then
-            content = get_vhosts_text(namespaces)
-        elseif format == 'html' then
-            content = get_vhosts_html(namespaces)
-        end
-    else
-        if ngx.req.get_uri_args().vhost ~= nil then
-            namespaces = namespaces:grep(ngx.req.get_uri_args().vhost)
+    if format == 'json' then
+        return get_vhosts_json(vhosts)
+    end
+
+    if format == 'text' then
+        return get_vhosts_text(vhosts)
+    end
+
+    if format == 'html' then
+        return get_vhosts_html(vhosts)
+    end
+end
+
+local render_stats = function(vhosts)
+    local format = output_helper.get_format()
+
+    if format == 'json' then
+        return get_stats_json(vhosts)
+    end
+
+    if format == 'text' then
+        return get_stats_text(vhosts)
+    end
+
+    if format == 'html' then
+        return get_stats_html(vhosts)
+    end
+end
+
+local filter_vhosts = function(vhosts, filter)
+    if filter then
+        local filter_func
+
+        if type(filter) == 'string' then
+            filter_func = function(vhost) return vhost:match(filter) end
+        elseif type(filter) == 'table' then
+            filter_func = function(vhost) return index(vhost, filter) ~= nil end
+        elseif type(filter) == 'function' then
+            filter_func = filter
+        else
+            filter_func = function() end
         end
 
-        if format == 'json' then
-            content = get_stats_json(namespaces)
-        elseif format == 'text' then
-            content = get_stats_text(namespaces)
-        elseif format == 'html' then
-            content = get_stats_html(namespaces)
-        end
+        vhosts = vhosts:filter(filter_func)
+    end
+
+    if ngx.req.get_uri_args().vhost ~= nil then
+        vhosts = vhosts:grep(ngx.req.get_uri_args().vhost)
+    end
+
+    return vhosts
+end
+
+local render = function(options)
+    local vhosts = iter(namespaces.list())
+
+    local content
+
+    if operator.truth(ngx.req.get_uri_args().list_vhosts) then
+        content = render_vhosts(vhosts)
+    else
+        content = render_stats(filter_vhosts(vhosts, options.vhosts_filter))
     end
 
     output_helper.set_content_type_header()

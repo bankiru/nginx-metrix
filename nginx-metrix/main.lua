@@ -20,7 +20,7 @@ local output     = require 'nginx-metrix.output.renderer'
 --------------------------------------------------------------------------------
 -- Collectors functions
 --------------------------------------------------------------------------------
-local builtin_collectors = iter({[[request]], [[status]], [[upstream]]})
+local builtin_collectors = iter({ [[request]], [[status]], [[upstream]] })
 
 ---
 -- @param collector
@@ -34,10 +34,10 @@ end
 
 ---
 --
-local register_builtin_collectors = function()
+local register_builtin_collectors = function(self)
     builtin_collectors:each(function(name)
         local collector = require('nginx-metrix.collectors.' .. name)
-        register_collector(collector)
+        self.register_collector(collector)
     end)
 end
 
@@ -71,18 +71,15 @@ end
 -- Output
 --------------------------------------------------------------------------------
 ---
--- @param _do_not_track bool default true
+-- @param options bool default true
 ---
-local show = function(_do_not_track)
-    namespaces.activate(ngx.var.server_name or ngx.var.hostname)
+local show = function(options)
+    options = options or {}
+    options.vhosts_filter = options.vhosts_filter or ngx.var.server_name or ngx.var.hostname
 
-    output.render()
+    output.render(options)
 
-    if _do_not_track ~= nil then
-        do_not_track = _do_not_track
-    else
-        do_not_track = true
-    end
+    do_not_track = true
 end
 
 --------------------------------------------------------------------------------
@@ -102,12 +99,20 @@ if __TEST__ then
     }
 end
 
-return function(options)
-    require('nginx-metrix.storage.dict').init(options)
+setmetatable(exports, {
+    __call = function(self, options)
+        require('nginx-metrix.storage.dict').init(options)
 
-    if not options.skip_register_builtin_collectors then
-        register_builtin_collectors()
-    end
+        if options.vhosts ~= nil then
+            namespaces.init({namespaces=options.vhosts})
+        end
 
-    return exports
-end
+        if not options.skip_register_builtin_collectors then
+            self:register_builtin_collectors()
+        end
+
+        return self
+    end,
+})
+
+return exports

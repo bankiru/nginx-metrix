@@ -25,7 +25,7 @@ lua_package_cpath '/etc/nginx/?.so;;';
 init_by_lua_block {
     metrix = require 'nginx-metrix.main'({
         shared_dict = 'metrix',
-        namespaces  = {[[mydomain1]], [[mydomain2]], ...}
+        vhosts = {[[mydomain1]], [[mydomain2]], ...}
     })
 }
 
@@ -64,7 +64,7 @@ server {
     location / {
         default_type 'text/plain';
         content_by_lua_block {
-            metrix.show({vhost='all'})
+            metrix.show({vhosts_filter='.*'})
         }
     }
 }

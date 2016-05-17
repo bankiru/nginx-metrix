@@ -16,7 +16,8 @@ end
 local s = require('say') --our i18n lib, installed through luarocks, included as a luassert dependency
 
 local M = {
-    assertions = {}
+    assertions = {},
+    matchers = {},
 }
 
 local function table_includes(container, contained)
@@ -77,8 +78,23 @@ local function table_equals(actual, expected)
     return false
 end
 
-local function is_callable (obj)
+local function is_callable(obj)
     return type(obj) == 'function' or getmetatable(obj) and getmetatable(obj).__call and true
+end
+
+local function json_equal(json1, json2)
+    local json = require 'nginx-metrix.lib.json'
+    local util = require 'luassert.util'
+
+    if type(json1) == 'string' then
+        json1 = json.decode(json1)
+    end
+
+    if type(json2) == 'string' then
+        json2 = json.decode(json2)
+    end
+
+    return util.deepcompare(json1, json2, true)
 end
 
 s:set("assertion.fail.positive", "%s")
@@ -101,11 +117,29 @@ s:set("assertion.is_callable.positive", "Expected %s to be callable")
 s:set("assertion.is_callable.negative", "Expected %s to be NOT callable")
 M.assertions['is_callable'] = function(_, arguments) return is_callable(arguments[1]) end
 
+s:set("assertion.json_equal.positive", "Expected %s\n to be equal with %s")
+s:set("assertion.json_equal.negative", "Expected %s\n to be NOT equal with %s")
+M.assertions['json_equal'] = function(_, arguments) return json_equal(arguments[1], arguments[2]) end
+
+M.matchers["json_equal"] = function (_, arguments)
+    return function(value)
+        local is_eq = json_equal(value, arguments[1])
+        if not is_eq then
+            local i = require 'inspect'
+            print(i({json1=value, json2=arguments[1]}))
+        end
+        return is_eq
+    end
+end
+
 -- a special syntax sugar to export all functions to the global table
 setmetatable(M, {
     __call = function(t, assert)
         for a_name, a_func in pairs(t.assertions) do
             assert:register("assertion", a_name, a_func, "assertion."..a_name..".positive", "assertion."..a_name..".negative")
+        end
+        for a_name, a_func in pairs(t.matchers) do
+            assert:register("matcher", a_name, a_func)
         end
     end,
 })

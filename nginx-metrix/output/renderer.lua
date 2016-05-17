@@ -75,7 +75,8 @@ local get_vhosts_html = function(vhosts)
     return output_helper.html.page_template(
         output_helper.html.section_template(
             lust{[[<ul class="list-group">@map{ vhost=vhosts }:{{<li class="list-group-item">$vhost</li>}}</ul>]]}:gen{vhosts=vhosts:totable()}
-        ):gen{name='vhosts'}
+        ):gen{
+            name='vhosts'}
     ):gen{}
 end
 
@@ -144,6 +145,8 @@ local render_stats = function(vhosts)
 end
 
 local filter_vhosts = function(vhosts, filter)
+    vhosts = iter(vhosts)
+
     if filter then
         local filter_func
 
@@ -160,22 +163,18 @@ local filter_vhosts = function(vhosts, filter)
         vhosts = vhosts:filter(filter_func)
     end
 
-    if ngx.req.get_uri_args().vhost ~= nil then
-        vhosts = vhosts:grep(ngx.req.get_uri_args().vhost)
-    end
-
     return vhosts
 end
 
 local render = function(options)
-    local vhosts = iter(namespaces.list())
+    local vhosts = filter_vhosts(namespaces.list(), options.vhosts_filter)
 
     local content
 
-    if operator.truth(ngx.req.get_uri_args().list_vhosts) then
+    if ngx.req.get_uri_args().list_vhosts ~= nil then
         content = render_vhosts(vhosts)
     else
-        content = render_stats(filter_vhosts(vhosts, options.vhosts_filter))
+        content = render_stats(filter_vhosts(vhosts, ngx.req.get_uri_args().vhost))
     end
 
     output_helper.set_content_type_header()
@@ -197,6 +196,9 @@ if __TEST__ then
         get_stats_text  = get_stats_text,
         get_vhosts_html = get_vhosts_html,
         get_stats_html  = get_stats_html,
+        filter_vhosts   = filter_vhosts,
+        render_vhosts   = render_vhosts,
+        render_stats    = render_stats,
     }
 end
 

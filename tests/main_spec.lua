@@ -3,16 +3,6 @@ require('tests.bootstrap')(assert)
 describe('main', function()
     local match = require 'luassert.match'
 
-    local function eq_json(_, arguments)
-        return function(value)
-            local json = require 'nginx-metrix.lib.json'
-            local util = require 'luassert.util'
-            value =  json.decode(value)
-            return util.deepcompare(value, arguments[1], true)
-        end
-    end
-    assert:register("matcher", "eq_json", eq_json)
-
     after_each(function()
         if package.loaded then
             grep('^nginx[-]metrix[.].+', package.loaded):each(function(k, _)
@@ -146,7 +136,7 @@ describe('main', function()
 
         metrix.show({vhosts_filter='.*'})
         assert.spy(ngx.say).was.called(1)
-        assert.spy(ngx.say).was.called_with(match.eq_json({
+        assert.spy(ngx.say).was.called_with(match.json_equal({
             ['service'] = "nginx-metrix",
             ['first.com'] = {['test-collector'] = {['testfield'] = 0},['vhost'] = "first.com"},
             ['second.com'] = {['test-collector'] = {['testfield'] = 0},['vhost'] = "second.com"},
@@ -158,7 +148,7 @@ describe('main', function()
 
         metrix.show({vhosts_filter='first.com'})
         assert.spy(ngx.say).was.called(1)
-        assert.spy(ngx.say).was.called_with(match.eq_json({
+        assert.spy(ngx.say).was.called_with(match.json_equal({
             ['service'] = "nginx-metrix",
             ['test-collector'] = {['testfield'] = 0},
             ['vhost'] = "first.com",

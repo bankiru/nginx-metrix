@@ -2,6 +2,7 @@ local exports = {}
 
 local version = require 'nginx-metrix.version'
 local lust = require 'Lust'
+local logger = require 'nginx-metrix.logger'
 
 local formats2headers = {
     ["text"] = "text/plain",
@@ -16,8 +17,9 @@ end
 
 local header_http_accept = function()
     local _accept = {}
-    if ngx.req.get_headers().accept then
-        for accept in string.gmatch(ngx.req.get_headers().accept, "%w+/%w+") do
+    local accept_headers = ngx.req.get_headers().accept
+    if accept_headers then
+        for accept in string.gmatch(accept_headers, "%w+/%w+") do
             table.insert(_accept, accept)
         end
     end
@@ -48,7 +50,7 @@ end
 ---
 local set_content_type_header = function(content_type)
     if ngx.headers_sent then
-        ngx.log(ngx.WARN, 'Can not set Content-type header because headers already sent')
+        logger.warn('Can not set Content-type header because headers already sent')
     else
         ngx.header.content_type = content_type or formats2headers[get_format()]
     end
@@ -67,7 +69,7 @@ end
 ---------------------------
 
 local format_value = function(collector, name, value)
-    if value ~= nill and type(collector.fields) == 'table' and collector.fields[name] ~= nil and collector.fields[name].format ~= nil then
+    if value ~= nil and type(collector.fields) == 'table' and collector.fields[name] ~= nil and collector.fields[name].format ~= nil then
         value = collector.fields[name].format:format(value)
     end
 
@@ -208,6 +210,8 @@ exports.text.render_stats = text_render_stats
 
 if __TEST__ then
     exports.__private__ = {
+        header_http_accept = header_http_accept,
+        format_value = format_value
     }
 end
 

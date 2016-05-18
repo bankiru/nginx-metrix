@@ -1,7 +1,7 @@
 Nginx Metrix
 ============
-[![Build Status](https://travis-ci.org/bankiru/nginx-metrix.svg?style=flat)](https://travis-ci.org/bankiru/nginx-metrix)
-[![Coverage Status](https://coveralls.io/repos/github/bankiru/nginx-metrix/badge.svg?style=flat)](https://coveralls.io/github/bankiru/nginx-metrix?branch=master)
+[![Build Status](https://travis-ci.org/bankiru/nginx-metrix.svg?branch=1.0-dev)](https://travis-ci.org/bankiru/nginx-metrix)
+[![Coverage Status](https://coveralls.io/repos/github/bankiru/nginx-metrix/badge.svg?branch=1.0-dev)](https://coveralls.io/github/bankiru/nginx-metrix?branch=1.0-dev)
 
 Nginx metrics written on lua and works on top of nginx-lua-module
 

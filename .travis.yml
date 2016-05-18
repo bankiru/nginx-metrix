@@ -24,8 +24,8 @@ install:
 script:
   - busted
 
-#after_success:
-#  - luacov-coveralls -v
+after_success:
+  - luacov-coveralls -v
 
 notifications:
   email:

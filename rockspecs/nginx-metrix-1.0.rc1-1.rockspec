@@ -42,7 +42,7 @@ build = {
 
     ['nginx-metrix.storage.collector_wrapper_factory'] = 'nginx-metrix/storage/collector_wrapper_factory.lua',
     ['nginx-metrix.storage.dict']                      = 'nginx-metrix/storage/dict.lua',
-    ['nginx-metrix.storage.helper']                    = 'nginx-metrix/storage/namespaces.lua',
-    ['nginx-metrix.storage.renderer']                  = 'nginx-metrix/storage/serializer.lua',
+    ['nginx-metrix.storage.namespaces']                = 'nginx-metrix/storage/namespaces.lua',
+    ['nginx-metrix.storage.serializer']                = 'nginx-metrix/storage/serializer.lua',
   },
 }

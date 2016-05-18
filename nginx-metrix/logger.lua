@@ -65,11 +65,4 @@ exports.notice = notice
 exports.info = info
 exports.debug = debug
 
-setmetatable(exports, {
-    __call = function(_)
-        _G.logger = exports
-        return exports
-    end,
-})
-
 return exports

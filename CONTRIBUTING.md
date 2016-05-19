@@ -1,7 +1,7 @@
-Contributing to Busted
-======================
+Contributing to Nginx Metrix
+============================
 
-So you want to contribute to busted? Fantastic! Here's a brief overview on
+So you want to contribute to Nginx Metrix? Fantastic! Here's a brief overview on
 how best to do so.
 
 ## What to change

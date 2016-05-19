@@ -75,8 +75,7 @@ local get_vhosts_html = function(vhosts)
     return output_helper.html.page_template(
         output_helper.html.section_template(
             lust{[[<ul class="list-group">@map{ vhost=vhosts }:{{<li class="list-group-item">$vhost</li>}}</ul>]]}:gen{vhosts=vhosts:totable()}
-        ):gen{
-            name='vhosts'}
+        ):gen{name='vhosts'}
     ):gen{}
 end
 

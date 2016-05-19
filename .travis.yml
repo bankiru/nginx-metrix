@@ -24,7 +24,7 @@ install:
   - luarocks make rockspecs/nginx-metrix-local-1.rockspec --local
 
 script:
-#  - luacheck --std max+busted nginx-metrix tests
+  - luacheck rockspecs/nginx-metrix-local-1.rockspec
   - busted
 
 after_success:

@@ -14,11 +14,11 @@ local get_stats_json = function(vhosts)
         namespaces.activate(vhost)
 
         stats[vhost] = collectors.all:reduce(
-            function(stats, collector)
+            function(collectors_stats, collector)
                 if is.callable(collector.get_raw_stats) then
-                    stats[collector.name] = collector:get_raw_stats():tomap()
+                    collectors_stats[collector.name] = collector:get_raw_stats():tomap()
                 end
-                return stats
+                return collectors_stats
             end,
             {}
         )

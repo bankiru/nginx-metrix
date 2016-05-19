@@ -15,13 +15,16 @@ env:
 
 before_install:
   - source .travis/setenv_lua.sh
-  - luarocks install luacov-coveralls --server=https://luarocks.org/dev
-  - luarocks install busted
+  - luarocks show busted || luarocks install busted
+  - luarocks show luacov || luarocks install luacov
+  - luarocks show luacov-coveralls || luarocks install luacov-coveralls
+  - luarocks show luacheck || luarocks install luacheck
 
 install:
-  - luarocks make rockspecs/nginx-metrix-local-1.rockspec
+  - luarocks make rockspecs/nginx-metrix-local-1.rockspec --local
 
 script:
+#  - luacheck --std max+busted nginx-metrix tests
   - busted
 
 after_success:

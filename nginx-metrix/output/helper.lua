@@ -81,8 +81,7 @@ end
 ---------------------------
 
 local html_page_template = function(body)
-    local tpl = lust{
-        [[
+    local tpl = lust{[[
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -117,8 +116,7 @@ local html_page_template = function(body)
 end
 
 local html_section_template = function(body)
-    local tpl = lust{
-        [[
+    local tpl = lust{[[
                 <div class="panel panel-@if(class)<class>else<default_class>">
                     <div class="panel-heading">
                         <h3 class="panel-title">$name</h3>
@@ -143,13 +141,11 @@ local html_section_template = function(body)
 end
 
 local html_table_template = function()
-    return lust{
-        [[
+    return lust{[[
             <table class="table table-bordered table-condensed table-hover">
             @map{ item=items }:{{<tr><th class="col-md-2">$item.name</th><td>$item.value</td></tr>}}
             </table>
-        ]]
-    }
+    ]]}
 end
 
 local html_render_stats = function(collector)

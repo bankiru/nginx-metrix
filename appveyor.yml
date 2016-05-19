@@ -1,8 +1,8 @@
 version: 1.0-dev-{build}
 
 # Use default image unless needed
-#os:
-#- Windows Server 2012 R2
+os:
+  - Windows Server 2012 R2
 
 shallow_clone: true
 
@@ -19,16 +19,16 @@ environment:
     - LJ_VER: 2.0.4
     - LJ_VER: 2.1
 
-matrix:
-  allow_failures:
-    - configuration: MinGW
-      platform: x64
+#matrix:
+#  allow_failures:
+#    - configuration: MinGW
+#      platform: x64
 
 # Abuse this section so we can have a matrix with different Compiler versions
 # Is there a better way? Like injecting an array in the matrix?
-configuration:
-  - 2015
-  - MinGW
+#configuration:
+#  - 2015
+#  - MinGW
 
 platform:
   - x86

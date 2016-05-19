@@ -1,6 +1,6 @@
 local json
 
-for _, m in pairs({[[cjson]], [[json]]}) do
+for _, m in pairs({[[dkjson]], [[cjson]], [[json]]}) do
     local succ, _json = pcall(function() return require(m) end)
     if succ then
         json = _json

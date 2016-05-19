@@ -12,10 +12,11 @@ description = {
 }
 dependencies = {
   'lua ~> 5.1',
-  'lua-cjson >= 2.1',
-  'fun-alloyed >= 0.1.3',
-  'inspect >= 3.1.0',
-  'lust >= 0.1',
+  'lpeg',
+  'dkjson',
+  'fun-alloyed',
+  'inspect',
+  'lust',
 }
 
 build = {

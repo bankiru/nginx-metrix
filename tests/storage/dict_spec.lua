@@ -92,7 +92,18 @@ describe('storage.dict', function()
 
         local normalized_key = dict.__private__.normalize_key({})
         assert.is_string(normalized_key)
-        assert.matches('table: 0x[0-9a-f]+', normalized_key)
+        assert.matches('table: 0?x?[0-9a-f]+', normalized_key)
+    end)
+
+    it('non existent method', function()
+        assert.has_error(
+            function()
+                dict.non_existent_method()
+            end,
+            "attempt to call field 'non_existent_method' (a nil value)"
+        )
+        assert.spy(logger.error).was.called_with("dict method 'non_existent_method' does not exists")
+        assert.spy(logger.error).was_called(1)
     end)
 
     it('get', function()

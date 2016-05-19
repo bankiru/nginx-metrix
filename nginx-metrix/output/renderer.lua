@@ -156,7 +156,7 @@ local filter_vhosts = function(vhosts, filter)
         elseif type(filter) == 'function' then
             filter_func = filter
         else
-            filter_func = function() end
+            filter_func = function() return true end
         end
 
         vhosts = vhosts:filter(filter_func)

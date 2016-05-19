@@ -45,6 +45,10 @@ describe('output.helper', function()
         -- filter by function
         local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, function(vhost) return vhost:match('^s') end):totable()
         assert.is_same({'second.com'}, actual_vhosts)
+
+        -- inavlid filter
+        local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, 13):totable()
+        assert.is_same(test_vhosts, actual_vhosts)
     end)
 
     it('get_vhosts_json', function()

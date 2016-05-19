@@ -13,13 +13,13 @@ end
 
 local delay = 1
 local handler
-handler = function (premature, collectors)
+handler = function (premature, collectors_list)
     if premature then
         return
     end
 
-    if length(collectors) > 0 then
-        iter(collectors):map(
+    if length(collectors_list) > 0 then
+        iter(collectors_list):map(
             function(collector)
                 return collector, ngx.thread.spawn(function() collector:periodically() end)
             end
@@ -33,7 +33,7 @@ handler = function (premature, collectors)
         )
     end
 
-    local ok, err = ngx.timer.at(delay, handler, collectors)
+    local ok, err = ngx.timer.at(delay, handler, collectors_list)
     if not ok then
         logger.error("Failed to continue the scheduler - failed to create the timer: ", err)
         return

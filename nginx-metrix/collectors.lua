@@ -133,9 +133,9 @@ if __TEST__ then
     exports.__private__ = {
         collectors         = function(value)
             if value ~= nil then
-                local c = length(collectors)
-                while c > 0 do table.remove(collectors); c = c - 1 end
-                iter(value):each(function(c) table.insert(collectors, c) end)
+                local count = length(collectors)
+                while count > 0 do table.remove(collectors); count = count - 1 end
+                iter(value):each(function(collector) table.insert(collectors, collector) end)
             end
             return collectors
         end,

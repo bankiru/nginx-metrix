@@ -1,6 +1,7 @@
 Nginx Metrix
 ============
-[![Build Status](https://travis-ci.org/bankiru/nginx-metrix.svg?branch=1.0-dev)](https://travis-ci.org/bankiru/nginx-metrix)
+[![Travis CI Build Status](https://travis-ci.org/bankiru/nginx-metrix.svg?branch=1.0-dev)](https://travis-ci.org/bankiru/nginx-metrix)
+[![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/s3hy8fq32869o375/branch/1.0-dev?svg=true)](https://ci.appveyor.com/project/ekho/nginx-metrix/branch/1.0-dev)
 [![Coverage Status](https://coveralls.io/repos/github/bankiru/nginx-metrix/badge.svg?branch=1.0-dev)](https://coveralls.io/github/bankiru/nginx-metrix?branch=1.0-dev)
 
 Nginx metrics written on lua and works on top of nginx-lua-module

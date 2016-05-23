@@ -15,10 +15,11 @@ env:
 
 before_install:
   - source .travis/setenv_lua.sh
-  - luarocks show busted || luarocks install busted
-  - luarocks show luacov || luarocks install luacov
-  - luarocks show luacov-coveralls || luarocks install luacov-coveralls
-  - luarocks show luacheck || luarocks install luacheck
+  - luarocks show busted || luarocks install busted --local
+  - luarocks show luacov || luarocks install luacov --local
+  - luarocks show luacov-coveralls || luarocks install luacov-coveralls --local
+  - luarocks show luacheck || luarocks install luacheck --local
+  - export PATH="/home/travis/.luarocks/bin:$PATH"
 
 install:
   - luarocks make rockspecs/nginx-metrix-local-1.rockspec --local

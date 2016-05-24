@@ -7,19 +7,26 @@ env:
     - LUAROCKS=2.3.0
   matrix:
     - LUA=lua5.1
-#    - LUA=lua5.2
-#    - LUA=lua5.3
+    - LUA=lua5.2
+    - LUA=lua5.3
     - LUA=luajit     # latest stable version (2.0.4)
     - LUA=luajit2.0  # current head of 2.0 branch
     - LUA=luajit2.1  # current head of 2.1 branch
 
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: LUA=lua5.2
+    - env: LUA=lua5.3
+    - env: LUA=luajit2.0
+    - env: LUA=luajit2.1
+
 before_install:
   - source .travis/setenv_lua.sh
-  - luarocks show busted || luarocks install busted --local
-  - luarocks show luacov || luarocks install luacov --local
-  - luarocks show luacov-coveralls || luarocks install luacov-coveralls --local
-  - luarocks show luacheck || luarocks install luacheck --local
-  - export PATH="/home/travis/.luarocks/bin:$PATH"
+  - luarocks show busted || luarocks install busted
+  - luarocks show luacov || luarocks install luacov
+  - luarocks show luacov-coveralls || luarocks install luacov-coveralls
+  - luarocks show luacheck || luarocks install luacheck
 
 install:
   - luarocks make rockspecs/nginx-metrix-local-1.rockspec --local

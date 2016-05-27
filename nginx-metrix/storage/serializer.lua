@@ -1,7 +1,7 @@
 local exports = {}
 
 local serialized_table_token = '@@lua_table@@'
-local json = require 'nginx-metrix.lib.json'
+local json = require 'dkjson'
 
 ---
 -- @param value

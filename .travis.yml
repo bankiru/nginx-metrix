@@ -23,10 +23,10 @@ matrix:
 
 before_install:
   - source .travis/setenv_lua.sh
-  - luarocks show busted || luarocks install busted
-  - luarocks show luacov || luarocks install luacov
-  - luarocks show luacov-coveralls || luarocks install luacov-coveralls
-  - luarocks show luacheck || luarocks install luacheck
+  - luarocks show busted --mversion 2>/dev/null || luarocks install busted
+  - luarocks show luacov --mversion 2>/dev/null || luarocks install luacov
+  - luarocks show luacov-coveralls --mversion 2>/dev/null || luarocks install luacov-coveralls
+  - luarocks show luacheck --mversion 2>/dev/null || luarocks install luacheck
 
 install:
   - luarocks make rockspecs/nginx-metrix-local-1.rockspec --local

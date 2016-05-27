@@ -173,7 +173,10 @@ local render = function(options)
     if ngx.req.get_uri_args().list_vhosts ~= nil then
         content = render_vhosts(vhosts)
     else
-        content = render_stats(filter_vhosts(vhosts, ngx.req.get_uri_args().vhost))
+        if ngx.req.get_uri_args().vhost ~= nil then
+            vhosts = filter_vhosts(vhosts, '^' .. ngx.req.get_uri_args().vhost .. '$')
+        end
+        content = render_stats(vhosts)
     end
 
     output_helper.set_content_type_header()

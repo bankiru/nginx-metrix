@@ -28,11 +28,11 @@ describe('output.helper', function()
     end)
 
     it('filter_vhosts', function()
-        local test_vhosts = {'first.com', 'second.com', 'third.com'}
+        local test_vhosts = {'first.com', 'second.com', 'www2.second.com', 'third.com'}
 
         -- filter by string
-        local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, 'first.com'):totable()
-        assert.is_same({'first.com'}, actual_vhosts)
+        local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, 'second.com'):totable()
+        assert.is_same({'second.com', 'www2.second.com'}, actual_vhosts)
 
         -- filter by pattern
         local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, '^%w-s%w-[.]com$'):totable()
@@ -200,7 +200,7 @@ describe('output.helper', function()
         _G.ngx = mock({
             say = function() end,
             req = {
-                get_uri_args = function() return {vhost='com$'} end,
+                get_uri_args = function() return {vhost='.+[.]com'} end,
             }
         })
 
@@ -224,7 +224,7 @@ describe('output.helper', function()
         _G.ngx = mock({
             say = function() end,
             req = {
-                get_uri_args = function() return {list_vhosts=1, vhost='com$'} end,
+                get_uri_args = function() return {list_vhosts=1, vhost='.+[.]com'} end,
             }
         })
 

@@ -1,4 +1,4 @@
-local json = require 'nginx-metrix.lib.json'
+local json = require 'dkjson'
 local output_helper = require 'nginx-metrix.output.helper'
 local namespaces = require 'nginx-metrix.storage.namespaces'
 local collectors = require 'nginx-metrix.collectors'

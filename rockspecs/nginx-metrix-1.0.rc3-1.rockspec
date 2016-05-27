@@ -1,8 +1,8 @@
 package = 'nginx-metrix'
-version = '1.0.rc2-1'
+version = '1.0.rc3-1'
 source = {
-  url = 'https://github.com/bankiru/nginx-metrix/archive/v1.0-rc2.tar.gz',
-  dir = 'nginx-metrix-1.0-rc2'
+  url = 'https://github.com/bankiru/nginx-metrix/archive/v1.0-rc3.tar.gz',
+  dir = 'nginx-metrix-1.0-rc3'
 }
 description = {
   summary    = 'Extended Nginx status and metrics.',
@@ -32,7 +32,6 @@ build = {
     ['nginx-metrix.version']                           = 'nginx-metrix/version.lua',
 
     ['nginx-metrix.lib.is']                            = 'nginx-metrix/lib/is.lua',
-    ['nginx-metrix.lib.json']                          = 'nginx-metrix/lib/json.lua',
 
     ['nginx-metrix.collectors.request']                = 'nginx-metrix/collectors/request.lua',
     ['nginx-metrix.collectors.status']                 = 'nginx-metrix/collectors/status.lua',

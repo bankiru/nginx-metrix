@@ -83,7 +83,7 @@ local function is_callable(obj)
 end
 
 local function json_equal(json1, json2)
-    local json = require 'nginx-metrix.lib.json'
+    local json = require 'dkjson'
     local util = require 'luassert.util'
 
     if type(json1) == 'string' then

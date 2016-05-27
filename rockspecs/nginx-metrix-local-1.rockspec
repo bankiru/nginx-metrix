@@ -31,7 +31,6 @@ build = {
     ['nginx-metrix.version']                           = 'nginx-metrix/version.lua',
 
     ['nginx-metrix.lib.is']                            = 'nginx-metrix/lib/is.lua',
-    ['nginx-metrix.lib.json']                          = 'nginx-metrix/lib/json.lua',
 
     ['nginx-metrix.collectors.request']                = 'nginx-metrix/collectors/request.lua',
     ['nginx-metrix.collectors.status']                 = 'nginx-metrix/collectors/status.lua',

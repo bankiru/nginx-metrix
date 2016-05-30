@@ -1,3 +1,4 @@
 /.idea/
 /.vagrant/
 luacov.*.out
+*.src.rock

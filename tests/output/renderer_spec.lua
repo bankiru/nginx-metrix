@@ -30,24 +30,26 @@ describe('output.helper', function()
     it('filter_vhosts', function()
         local test_vhosts = {'first.com', 'second.com', 'www2.second.com', 'third.com'}
 
+        local actual_vhosts
+
         -- filter by string
-        local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, 'second.com'):totable()
+        actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, 'second.com'):totable()
         assert.is_same({'second.com', 'www2.second.com'}, actual_vhosts)
 
         -- filter by pattern
-        local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, '^%w-s%w-[.]com$'):totable()
+        actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, '^%w-s%w-[.]com$'):totable()
         assert.is_same({'first.com', 'second.com'}, actual_vhosts)
 
         -- filter by list of strings
-        local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, {'second.com', 'third.com'}):totable()
+        actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, {'second.com', 'third.com'}):totable()
         assert.is_same({'second.com', 'third.com'}, actual_vhosts)
 
         -- filter by function
-        local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, function(vhost) return vhost:match('^s') end):totable()
+        actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, function(vhost) return vhost:match('^s') end):totable()
         assert.is_same({'second.com'}, actual_vhosts)
 
         -- inavlid filter
-        local actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, 13):totable()
+        actual_vhosts = renderer.__private__.filter_vhosts(test_vhosts, 13):totable()
         assert.is_same(test_vhosts, actual_vhosts)
     end)
 
@@ -69,18 +71,21 @@ describe('output.helper', function()
     it('render_vhosts', function()
         local vhosts = iter({'first.com', 'second.com'})
 
-        local s = stub.new(helper, 'get_format').on_call_with().returns('json')
-        local actual = renderer.__private__.render_vhosts(vhosts)
+        local s
+        local actual
+
+        s = stub.new(helper, 'get_format').on_call_with().returns('json')
+        actual = renderer.__private__.render_vhosts(vhosts)
         assert.json_equal('["first.com","second.com"]', actual)
         s:revert()
 
-        local s = stub.new(helper, 'get_format').on_call_with().returns('text')
-        local actual = renderer.__private__.render_vhosts(vhosts)
+        s = stub.new(helper, 'get_format').on_call_with().returns('text')
+        actual = renderer.__private__.render_vhosts(vhosts)
         assert.is_equal("vhosts:\n	- first.com\n	- second.com", actual)
         s:revert()
 
-        local s = stub.new(helper, 'get_format').on_call_with().returns('html')
-        local actual = renderer.__private__.render_vhosts(vhosts)
+        s = stub.new(helper, 'get_format').on_call_with().returns('html')
+        actual = renderer.__private__.render_vhosts(vhosts)
         assert.matches('<ul class="list[-]group"><li class="list[-]group[-]item">first[.]com</li><li class="list[-]group[-]item">second[.]com</li></ul>', actual)
         s:revert()
     end)
@@ -165,13 +170,16 @@ describe('output.helper', function()
         local collectors = require 'nginx-metrix.collectors'
         collectors.all = iter({test_collector})
 
-        local s = stub.new(helper, 'get_format').on_call_with().returns('json')
-        local actual = renderer.__private__.render_stats(vhosts)
+        local s
+        local actual
+
+        s = stub.new(helper, 'get_format').on_call_with().returns('json')
+        actual = renderer.__private__.render_stats(vhosts)
         assert.json_equal('{"first.com":{"vhost":"first.com","test":{"test":1}},"service":"nginx-metrix","second.com":{"vhost":"second.com","test":{"test":2}}}', actual)
         s:revert()
 
-        local s = stub.new(helper, 'get_format').on_call_with().returns('text')
-        local actual = renderer.__private__.render_stats(vhosts)
+        s = stub.new(helper, 'get_format').on_call_with().returns('text')
+        actual = renderer.__private__.render_stats(vhosts)
         assert.matches('### Nginx Metrix v.- ###', actual)
         assert.matches('%[first[.]com@test%]', actual)
         assert.matches('test=3', actual)
@@ -179,8 +187,8 @@ describe('output.helper', function()
         assert.matches('test=4', actual)
         s:revert()
 
-        local s = stub.new(helper, 'get_format').on_call_with().returns('html')
-        local actual = renderer.__private__.render_stats(vhosts)
+        s = stub.new(helper, 'get_format').on_call_with().returns('html')
+        actual = renderer.__private__.render_stats(vhosts)
         assert.matches('<title>Nginx Metrix</title>', actual)
         assert.matches('<h3 class="panel[-]title">first[.]com</h3>', actual)
         assert.matches('<th>test</th><td>5</td>', actual)

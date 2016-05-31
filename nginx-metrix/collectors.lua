@@ -75,7 +75,7 @@ local collector_extend = function(collector)
             self:on_phase(phase)
         end,
 
-        periodically = function(self)
+        aggregate = function(self)
             iter(self.fields):each(function(field, params)
                 if params.mean then
                     self.storage:mean_flush(field)

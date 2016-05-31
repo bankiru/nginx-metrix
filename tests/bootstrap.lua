@@ -1,100 +1,102 @@
 _G.__TEST__ = true
 
-_ = package.loaded['fun'] or require 'fun'()
+local _ = package.loaded['fun'] or require 'fun'()
 require 'nginx-metrix.lib.is'()
 
-function copy(obj, seen)
-    if type(obj) ~= 'table' then return obj end
-    if seen and seen[obj] then return seen[obj] end
-    local s = seen or {}
-    local res = setmetatable({}, getmetatable(obj))
-    s[obj] = res
-    for k, v in pairs(obj) do res[copy(k, s)] = copy(v, s) end
-    return res
+local copy
+copy = function(obj, seen)
+  if type(obj) ~= 'table' then return obj end
+  if seen and seen[obj] then return seen[obj] end
+  local s = seen or {}
+  local res = setmetatable({}, getmetatable(obj))
+  s[obj] = res
+  for k, v in pairs(obj) do res[copy(k, s)] = copy(v, s) end
+  return res
 end
+_G.copy = copy
 
 local s = require('say') --our i18n lib, installed through luarocks, included as a luassert dependency
 
 local M = {
-    assertions = {},
-    matchers = {},
+  assertions = {},
+  matchers = {},
 }
 
 local function table_includes(container, contained)
-    if container == contained then return true end
-    local t1,t2 = type(container), type(contained)
-    if t1 ~= t2 then return false end
+  if container == contained then return true end
+  local t1, t2 = type(container), type(contained)
+  if t1 ~= t2 then return false end
 
-    if t1 == 'table' then
-        for k,v in pairs(contained) do
-            if not table_includes(container[k], v) then return false end
-        end
-        return true
+  if t1 == 'table' then
+    for k, v in pairs(contained) do
+      if not table_includes(container[k], v) then return false end
     end
-    return false
+    return true
+  end
+  return false
 end
 
 local function table_contains(t, element)
-    if t then
-        for _, value in pairs(t) do
-            if type(value) == type(element) then
-                if type(element) == 'table' then
-                    -- if we wanted recursive items content comparison, we could use
-                    -- table_equals(v, expected) but one level of just comparing
-                    -- items is sufficient
-                    if M.assertions.table_equals(nil, {value, element}) then
-                        return true
-                    end
-                else
-                    if value == element then
-                        return true
-                    end
-                end
-            end
+  if t then
+    for _, value in pairs(t) do
+      if type(value) == type(element) then
+        if type(element) == 'table' then
+          -- if we wanted recursive items content comparison, we could use
+          -- table_equals(v, expected) but one level of just comparing
+          -- items is sufficient
+          if M.assertions.table_equals(nil, { value, element }) then
+            return true
+          end
+        else
+          if value == element then
+            return true
+          end
         end
+      end
     end
-    return false
+  end
+  return false
 end
 
 
 local function table_equals(actual, expected)
-    if type(actual) == 'table' and type(expected) == 'table' then
-        for k,v in pairs(actual) do
-            if not table_contains(expected, v) then
-                return false
-            end
-        end
-        for k,v in pairs(expected) do
-            if not table_contains(actual, v) then
-                return false
-            end
-        end
-        return true
-    elseif type(actual) ~= type(expected) then
+  if type(actual) == 'table' and type(expected) == 'table' then
+    for _, v in pairs(actual) do
+      if not table_contains(expected, v) then
         return false
-    elseif actual == expected then
-        return true
+      end
     end
+    for _, v in pairs(expected) do
+      if not table_contains(actual, v) then
+        return false
+      end
+    end
+    return true
+  elseif type(actual) ~= type(expected) then
     return false
+  elseif actual == expected then
+    return true
+  end
+  return false
 end
 
 local function is_callable(obj)
-    return type(obj) == 'function' or getmetatable(obj) and getmetatable(obj).__call and true
+  return type(obj) == 'function' or getmetatable(obj) and getmetatable(obj).__call and true
 end
 
 local function json_equal(json1, json2)
-    local json = require 'dkjson'
-    local util = require 'luassert.util'
+  local json = require 'dkjson'
+  local util = require 'luassert.util'
 
-    if type(json1) == 'string' then
-        json1 = json.decode(json1)
-    end
+  if type(json1) == 'string' then
+    json1 = json.decode(json1)
+  end
 
-    if type(json2) == 'string' then
-        json2 = json.decode(json2)
-    end
+  if type(json2) == 'string' then
+    json2 = json.decode(json2)
+  end
 
-    return util.deepcompare(json1, json2, true)
+  return util.deepcompare(json1, json2, true)
 end
 
 s:set("assertion.fail.positive", "%s")
@@ -121,27 +123,27 @@ s:set("assertion.json_equal.positive", "Expected %s\n to be equal with %s")
 s:set("assertion.json_equal.negative", "Expected %s\n to be NOT equal with %s")
 M.assertions['json_equal'] = function(_, arguments) return json_equal(arguments[1], arguments[2]) end
 
-M.matchers["json_equal"] = function (_, arguments)
-    return function(value)
-        local is_eq = json_equal(value, arguments[1])
-        if not is_eq then
-            local i = require 'inspect'
-            print(i({json1=value, json2=arguments[1]}))
-        end
-        return is_eq
+M.matchers["json_equal"] = function(_, arguments)
+  return function(value)
+    local is_eq = json_equal(value, arguments[1])
+    if not is_eq then
+      local i = require 'inspect'
+      print(i({ json1 = value, json2 = arguments[1] }))
     end
+    return is_eq
+  end
 end
 
 -- a special syntax sugar to export all functions to the global table
 setmetatable(M, {
-    __call = function(t, assert)
-        for a_name, a_func in pairs(t.assertions) do
-            assert:register("assertion", a_name, a_func, "assertion."..a_name..".positive", "assertion."..a_name..".negative")
-        end
-        for a_name, a_func in pairs(t.matchers) do
-            assert:register("matcher", a_name, a_func)
-        end
-    end,
+  __call = function(t, assert)
+    for a_name, a_func in pairs(t.assertions) do
+      assert:register("assertion", a_name, a_func, "assertion." .. a_name .. ".positive", "assertion." .. a_name .. ".negative")
+    end
+    for a_name, a_func in pairs(t.matchers) do
+      assert:register("matcher", a_name, a_func)
+    end
+  end,
 })
 
 return M

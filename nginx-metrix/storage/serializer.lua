@@ -8,10 +8,10 @@ local json = require 'dkjson'
 -- @return string
 ---
 local serialize = function(value)
-    if type(value) == 'table' then
-        value = serialized_table_token .. json.encode(value)
-    end
-    return value
+  if type(value) == 'table' then
+    value = serialized_table_token .. json.encode(value)
+  end
+  return value
 end
 
 ---
@@ -19,15 +19,15 @@ end
 -- @return mixed
 ---
 local unserialize = function(value)
-    if type(value) == 'string' and value:sub(1, serialized_table_token:len()) == serialized_table_token then
-        local succ, decoded_value = pcall(function()
-            return json.decode(value:sub(serialized_table_token:len() + 1))
-        end)
-        if succ then
-            value = decoded_value
-        end
+  if type(value) == 'string' and value:sub(1, serialized_table_token:len()) == serialized_table_token then
+    local succ, decoded_value = pcall(function()
+      return json.decode(value:sub(serialized_table_token:len() + 1))
+    end)
+    if succ then
+      value = decoded_value
     end
-    return value
+  end
+  return value
 end
 -- /serializer
 

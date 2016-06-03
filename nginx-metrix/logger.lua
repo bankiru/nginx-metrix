@@ -1,51 +1,51 @@
 local inspect = require 'inspect'
 
 local log = function(level, msg, ...)
-    if type(msg) ~= 'string' then
-        msg = inspect(msg)
-    end
+  if type(msg) ~= 'string' then
+    msg = inspect(msg)
+  end
 
-    if length({ ... }) > 0 then
-        msg = msg .. ' :: ' .. inspect({ ... })
-    end
+  if length({ ... }) > 0 then
+    msg = msg .. ' :: ' .. inspect({ ... })
+  end
 
-    ngx.log(level, msg)
+  ngx.log(level, msg)
 end
 
 local stderr = function(...)
-    log(ngx.STDERR, ...)
+  log(ngx.STDERR, ...)
 end
 
 local emerg = function(...)
-    log(ngx.EMERG, ...)
+  log(ngx.EMERG, ...)
 end
 
 local alert = function(...)
-    log(ngx.ALERT, ...)
+  log(ngx.ALERT, ...)
 end
 
 local crit = function(...)
-    log(ngx.CRIT, ...)
+  log(ngx.CRIT, ...)
 end
 
 local err = function(...)
-    log(ngx.ERR, ...)
+  log(ngx.ERR, ...)
 end
 
 local warn = function(...)
-    log(ngx.WARN, ...)
+  log(ngx.WARN, ...)
 end
 
 local notice = function(...)
-    log(ngx.NOTICE, ...)
+  log(ngx.NOTICE, ...)
 end
 
 local info = function(...)
-    log(ngx.INFO, ...)
+  log(ngx.INFO, ...)
 end
 
 local debug = function(...)
-    log(ngx.DEBUG, ...)
+  log(ngx.DEBUG, ...)
 end
 
 local exports = {}

@@ -62,7 +62,7 @@ local create_shared_dict = function()
         return value, flags, false
     end
 
-    function shared_dict_meta_table:set(key, value, exptime, flags)
+    function shared_dict_meta_table:set(key, value, _, flags)
         assert_key(key)
         assert_value(value)
         assert_flags(flags)
@@ -134,7 +134,7 @@ local create_shared_dict = function()
         end
     end
 
-    function shared_dict_meta_table:flush_expired()
+    function shared_dict_meta_table.flush_expired()
     end
 
     function shared_dict_meta_table:get_keys()

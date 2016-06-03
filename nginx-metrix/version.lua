@@ -1,1 +1,1 @@
-return '1.0-rc4'
+return '1.0-rc5'

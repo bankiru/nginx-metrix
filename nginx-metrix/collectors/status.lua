@@ -9,28 +9,28 @@
 local field_params = { format = '%d', cyclic = true, }
 
 local collector = {
-    name = 'status',
-    fields = {
-        ['200'] = field_params,
-        ['301'] = field_params,
-        ['302'] = field_params,
-        ['304'] = field_params,
-        ['403'] = field_params,
-        ['404'] = field_params,
-        ['500'] = field_params,
-        ['502'] = field_params,
-        ['503'] = field_params,
-        ['504'] = field_params,
-    },
-    ngx_phases = {[[log]]},
-    on_phase = function(self, phase)
-        if phase == 'log' and ngx.status ~= nil then
-            if self.fields[tostring(ngx.status)] == nil then
-                self.fields[tostring(ngx.status)] = field_params
-            end
-            self.storage:cyclic_incr(ngx.status)
-        end
-    end,
+  name = 'status',
+  fields = {
+    ['200'] = field_params,
+    ['301'] = field_params,
+    ['302'] = field_params,
+    ['304'] = field_params,
+    ['403'] = field_params,
+    ['404'] = field_params,
+    ['500'] = field_params,
+    ['502'] = field_params,
+    ['503'] = field_params,
+    ['504'] = field_params,
+  },
+  ngx_phases = { [[log]] },
+  on_phase = function(self, phase)
+    if phase == 'log' and ngx.status ~= nil then
+      if self.fields[tostring(ngx.status)] == nil then
+        self.fields[tostring(ngx.status)] = field_params
+      end
+      self.storage:cyclic_incr(ngx.status)
+    end
+  end,
 }
 
 return collector

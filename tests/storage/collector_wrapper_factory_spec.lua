@@ -35,6 +35,7 @@ describe('storage.collector_wrapper_factory', function()
 
   after_each(function()
     namespaces.reset_active()
+    mock.clear(dict_mock)
   end)
 
   it('create', function()
@@ -191,6 +192,18 @@ describe('storage.collector_wrapper_factory', function()
     wrapper_metatable:mean_flush('test-key')
     assert.spy(dict_mock.get).was.called_with('collector_mock¦test-key')
     assert.spy(dict_mock.set).was.called_with('collector_mock¦test-key', 7, 0, 1)
+
+    dict_mock.get:revert()
+  end)
+
+  it('wrapper_metatable.mean_flush [existent, zero]', function()
+    local wrapper_metatable = mk_wrapper_metatable_mock('collector-mock')
+
+    stub.new(dict_mock, 'get').on_call_with('collector_mock¦test-key').returns(0, 1)
+
+    wrapper_metatable:mean_flush('test-key')
+    assert.spy(dict_mock.get).was.called_with('collector_mock¦test-key')
+    assert.spy(dict_mock.set).was.called_with('collector_mock¦test-key', 0, 0, 0)
 
     dict_mock.get:revert()
   end)

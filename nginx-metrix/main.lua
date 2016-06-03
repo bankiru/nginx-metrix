@@ -26,19 +26,19 @@ local builtin_collectors = iter({ [[request]], [[status]], [[upstream]] })
 -- @param collector
 ---
 local register_collector = function(collector)
-    collector = collectors.register(collector)
+  collector = collectors.register(collector)
 
-    listener.attach_collector(collector)
-    scheduler.attach_collector(collector)
+  listener.attach_collector(collector)
+  scheduler.attach_collector(collector)
 end
 
 ---
 --
 local register_builtin_collectors = function(self)
-    builtin_collectors:each(function(name)
-        local collector = require('nginx-metrix.collectors.' .. name)
-        self.register_collector(collector)
-    end)
+  builtin_collectors:each(function(name)
+    local collector = require('nginx-metrix.collectors.' .. name)
+    self.register_collector(collector)
+  end)
 end
 
 --------------------------------------------------------------------------------
@@ -49,13 +49,13 @@ end
 -- @param phase string
 ---
 local handle_ngx_phase = function(phase)
-    namespaces.activate(ngx.var.server_name or ngx.var.hostname)
+  namespaces.activate(ngx.var.server_name or ngx.var.hostname)
 
-    if do_not_track then
-        do_not_track = false
-    else
-        listener.handle_phase(phase)
-    end
+  if do_not_track then
+    do_not_track = false
+  else
+    listener.handle_phase(phase)
+  end
 end
 
 --------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ end
 ---
 --
 local init_scheduler = function()
-    scheduler.start()
+  scheduler.start()
 end
 
 --------------------------------------------------------------------------------
@@ -74,12 +74,12 @@ end
 -- @param options bool default true
 ---
 local show = function(options)
-    options = options or {}
-    options.vhosts_filter = options.vhosts_filter or ngx.var.server_name or ngx.var.hostname
+  options = options or {}
+  options.vhosts_filter = options.vhosts_filter or ngx.var.server_name or ngx.var.hostname
 
-    output.render(options)
+  output.render(options)
 
-    do_not_track = true
+  do_not_track = true
 end
 
 --------------------------------------------------------------------------------
@@ -94,25 +94,25 @@ exports.init_scheduler = init_scheduler
 exports.show = show
 
 if __TEST__ then
-    exports.__private__ = {
-        collectors = collectors,
-    }
+  exports.__private__ = {
+    collectors = collectors,
+  }
 end
 
 setmetatable(exports, {
-    __call = function(self, options)
-        require('nginx-metrix.storage.dict').init(options)
+  __call = function(self, options)
+    require('nginx-metrix.storage.dict').init(options)
 
-        if options.vhosts ~= nil then
-            namespaces.init({namespaces=options.vhosts})
-        end
+    if options.vhosts ~= nil then
+      namespaces.init({ namespaces = options.vhosts })
+    end
 
-        if not options.skip_register_builtin_collectors then
-            self:register_builtin_collectors()
-        end
+    if not options.skip_register_builtin_collectors then
+      self:register_builtin_collectors()
+    end
 
-        return self
-    end,
+    return self
+  end,
 })
 
 return exports

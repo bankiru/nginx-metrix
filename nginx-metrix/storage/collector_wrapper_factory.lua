@@ -142,6 +142,7 @@ end
 ---
 wrapper_metatable.mean_add = function(self, key, value)
   key = self:prepare_key(key)
+  if type(value) ~= 'number' then value = tonumber(value) or 0 end
   local prev_value, counter = storage_dict.get(key)
   value = ((prev_value or 0) * counter + value) / (counter + 1)
   return storage_dict.set(key, value, nil, counter + 1)

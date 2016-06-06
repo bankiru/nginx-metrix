@@ -115,4 +115,23 @@ describe('collectors.request', function()
         assert.spy(collector.storage.mean_add).was.called_with(collector.storage, 'length_ps', 123)
         assert.spy(collector.storage.mean_add).was.called(2)
     end)
+
+    it('handles phase log #4', function()
+        _G.ngx = {
+            status = 200,
+            var = {
+                request_time = '-',
+                https = 'off',
+                request_length = '-',
+            },
+            req = {
+                is_internal = function() return false end,
+            },
+        }
+        collector:on_phase('log')
+
+        assert.spy(collector.storage.cyclic_incr).was.called_with(collector.storage, 'rps')
+        assert.spy(collector.storage.cyclic_incr).was.called(1)
+        assert.spy(collector.storage.mean_add).was_not.called()
+    end)
 end)

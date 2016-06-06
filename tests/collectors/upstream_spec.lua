@@ -44,13 +44,13 @@ describe('collectors.upstream', function()
         assert.spy(collector.storage.mean_add).was_not.called()
     end)
 
-    it('handles phase log', function()
+    it('handles phase log #1', function()
         _G.ngx = {
             var = {
                 upstream_addr = '127.0.0.1',
                 upstream_connect_time = 1,
                 upstream_header_time = 2,
-                upstream_response_time = 3
+                upstream_response_time = 3,
             },
         }
         collector:on_phase('log')
@@ -61,5 +61,21 @@ describe('collectors.upstream', function()
         assert.spy(collector.storage.mean_add).was.called_with(collector.storage, 'header_time', 2)
         assert.spy(collector.storage.mean_add).was.called_with(collector.storage, 'response_time', 3)
         assert.spy(collector.storage.mean_add).was.called(3)
+    end)
+
+    it('handles phase log #2', function()
+        _G.ngx = {
+            var = {
+                upstream_addr = '127.0.0.1',
+                upstream_connect_time = '-',
+                upstream_header_time = '-',
+                upstream_response_time = '-',
+            },
+        }
+        collector:on_phase('log')
+
+        assert.spy(collector.storage.cyclic_incr).was.called_with(collector.storage, 'rps')
+        assert.spy(collector.storage.cyclic_incr).was.called(1)
+        assert.spy(collector.storage.mean_add).was_not.called()
     end)
 end)

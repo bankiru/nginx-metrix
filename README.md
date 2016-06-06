@@ -22,6 +22,8 @@ Metrix entirely written in [lua](https://www.lua.org/).
 * extensibility (in future)
 * complete code coverage
 
+[![Screenshot](/doc/screenshot_preview.png)](/doc/screenshot.png)
+
 Requirements
 ------------
 

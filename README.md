@@ -92,6 +92,7 @@ location /metrix/ {
     metrix.show()
   }
 }
+
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;2\. Separate virtual host (`server`):
 
@@ -109,21 +110,21 @@ server {
 }
 ```
 
+*NOTE 1: You should to take care of security. For example to use the allow/deny rules or authorization.*
+
+*NOTE 2: You can use both methods together.*
+
 ### See or collect stats
 
-Stats can be
+Stats can be found at http://mydomain/metrix/ in case of special location. Or at http://metrix:81/ in case of separate server configuration.
 
 Statistics can be viewed in the browser or obtain using various tools.
 
+Supported output formats: `text`(default), `html` and `json`. Format determines by `Accept` http header or by `format` parameter.
 
-
-Supported formats: `text`(default), `html` and `json`.
-
-Format determines by `Accept` http header or by `format` parameter.
-
-If you are using existing `server` with special location you will see stats about this vhost.
-If you are using separate `server` stats for all existing (collected) vhosts will be showed.
-If you want to see stats about only one you should pass parameter `vhost=yourdomain.com`
+By default statistics shows for current virtual host. But you can specify `vhosts_filter` parameter (list of strings or lua string pattern).
+List of affected virtual hosts can be obtained by `list_vhosts` query string parameter.
+If `vhosts_filter` specified and you want to see stats about only one of vhosts you should pass parameter `vhost=yourdomain.com` in query string.
 
 Extending
 ---------

@@ -9,12 +9,32 @@ Extended nginx status and metrics.
 Description
 -----------
 
+Nginx out-of-the-box has not the most complete status page provided by [status](http://nginx.org/ru/docs/http/ngx_http_status_module.html) module.
+It is worth noting that in Nginx Plus, this module provides more information.
 
+But using [lua](https://github.com/openresty/lua-nginx-module) module can get much more information. This is the purpose nginx-metrix.
+
+Metrix entirely written in [lua](https://www.lua.org/).
+
+**Base features of Metrix:**
+* OpenSource ([MIT licence](https://github.com/bankiru/nginx-metrix/blob/master/LICENCE))
+* modularity
+* extensibility (in future)
+* complete code coverage
+
+Requirements
+------------
+
+* nginx >= 1.6.0, but recommended >= 1.9.0
+* lua-nginx-module >= 0.9.17
+* luarocks >= 2.0
 
 Usage
 -----
 
-### Install
+Nginx with lua-nginx-module should be installed using their instructions.
+
+### Install nginx metrix module
 
 ```
 luarocks install nginx-metrix

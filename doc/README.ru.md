@@ -11,6 +11,7 @@ Nginx Metrix
 
 Nginx "из коробки" меет крайне скупую статистику, предоставляемую модулем [status](http://nginx.org/ru/docs/http/ngx_http_status_module.html).
 Стоит отметить, что в Nginx Plus этот модуль даёт побольше информации.
+
 К счастью, существует модуль [lua](https://github.com/openresty/lua-nginx-module) для Nginx, с помощью которого можно получить несколько больше того, что даёт status.
 
 Metrix целиком и полностью написан на lua.
@@ -18,7 +19,7 @@ Metrix целиком и полностью написан на lua.
 **Основные фичи Metrix:**
 * открытый исходный код (лицензия MIT, см. [LICENCE](https://github.com/bankiru/nginx-metrix/blob/master/LICENCE))
 * модульность
-* расширяемость (пока условная)
+* расширяемость (в будущем)
 * полное покрытие тестами
 
 Системные требования

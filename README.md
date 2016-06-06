@@ -126,6 +126,21 @@ By default statistics shows for current virtual host. But you can specify `vhost
 List of affected virtual hosts can be obtained by `list_vhosts` query string parameter.
 If `vhosts_filter` specified and you want to see stats about only one of vhosts you should pass parameter `vhost=yourdomain.com` in query string.
 
+#### Bundled metrics
+
+1. **request**
+    1. `rps` - number of requests per second
+    1. `internal_rps` - number of internal requests per second
+    1. `https_rps` - number of https requests per second
+    1. `time_ps` - average time of request processing
+    1. `length_ps` - average length of request
+1. **status** - number of requests per second grouped by response status (200, 301, 302, 404, 500, etc).
+1. **upstream**
+    1. `rps` - number of requests sent to an upstreams per second
+    1. `connect_time` - average time of connection to upstreams
+    1. `header_time` - average time of http header transfers
+    1. `response_time` - average time of upstream response
+
 Extending
 ---------
 

@@ -17,7 +17,7 @@ But using [lua](https://github.com/openresty/lua-nginx-module) module can get mu
 Metrix entirely written in [lua](https://www.lua.org/).
 
 **Base features of Metrix:**
-* OpenSource ([MIT licence](https://github.com/bankiru/nginx-metrix/blob/master/LICENCE))
+* OpenSource ([MIT licence](/LICENCE))
 * modularity
 * extensibility (in future)
 * complete code coverage
@@ -146,14 +146,14 @@ If `vhosts_filter` specified and you want to see stats about only one of vhosts 
 Extending
 ---------
 
-Cookbook about creating custom metrics: [COOKBOOK-COLLECTORS.md](https://github.com/bankiru/nginx-metrix/blob/master/doc/COOKBOOK-COLLECTORS.md).
+Cookbook about creating custom metrics: [COOKBOOK-COLLECTORS.md](/doc/COOKBOOK-COLLECTORS.md).
 
 Contributing
 ------------
 
-See [CONTRIBUTING.md](https://github.com/bankiru/nginx-metrix/blob/master/CONTRIBUTING.md). All issues, suggestions, and most importantly pull requests are welcome.
+See [CONTRIBUTING.md](/CONTRIBUTING.md). All issues, suggestions, and most importantly pull requests are welcome.
 
 Licence
 -------
 
-Copyright 2016 Banki.ru News Agency, Ltd. MIT licensed. See [LICENSE](https://github.com/bankiru/nginx-metrix/blob/master/LICENSE) for details.
+Copyright 2016 Banki.ru News Agency, Ltd. MIT licensed. See [LICENSE](/LICENSE) for details.

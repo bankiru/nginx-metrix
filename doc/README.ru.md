@@ -127,7 +127,7 @@ server {
 Расширение функционала
 ----------------------
 
-Инстукция по созданию собственных метрик [COOKBOOK-COLLECTORS.md](https://github.com/bankiru/nginx-metrix/blob/master/doc/COOKBOOK-COLLECTORS.md).
+Инстукция по созданию собственных метрик: [COOKBOOK-COLLECTORS.md](https://github.com/bankiru/nginx-metrix/blob/master/doc/COOKBOOK-COLLECTORS.md).
 
 Помощь проекту
 --------------

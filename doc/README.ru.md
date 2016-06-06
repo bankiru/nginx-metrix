@@ -9,7 +9,7 @@ Nginx Metrix
 Описание
 --------
 
-Nginx из коробки меет крайне скупую статистику, предоставляемую модулем [status](http://nginx.org/ru/docs/http/ngx_http_status_module.html).
+Nginx "из коробки" меет крайне скупую статистику, предоставляемую модулем [status](http://nginx.org/ru/docs/http/ngx_http_status_module.html).
 Стоит отметить, что в Nginx Plus этот модуль даёт побольше информации.
 К счастью, существует модуль [lua](https://github.com/openresty/lua-nginx-module) для Nginx, с помощью которого можно получить несколько больше того, что даёт status.
 

@@ -16,7 +16,7 @@ Nginx из коробки меет крайне скупую статистик�
 Metrix целиком и полностью написан на lua.
 
 **Основные фичи Metrix:**
-* открытый исходный код (лицензия MIT, см. [LICENCE](./LICENCE))
+* открытый исходный код (лицензия MIT, см. [LICENCE](https://github.com/bankiru/nginx-metrix/blob/master/LICENCE))
 * модульность
 * расширяемость (пока условная)
 * полное покрытие тестами
@@ -60,15 +60,15 @@ lua_shared_dict metrix 16m; # задаём хранилище метрик ра�
 # инициализация metrix
 # в vhosts можно (но не обязательно) перечислить первичные server_name всех виртуалхостов
 init_by_lua_block {
-    metrix = require 'nginx-metrix.main'({
-        shared_dict = 'metrix',
-        vhosts = {'mydomain1', 'mydomain2', ...}
-    })
+  metrix = require 'nginx-metrix.main'({
+    shared_dict = 'metrix',
+    vhosts = {'mydomain1', 'mydomain2', ...}
+  })
 }
 
 # иницализация внутреннего воркера для пересчёта статистик
 init_worker_by_lua_block {
-    metrix.init_scheduler()
+  metrix.init_scheduler()
 }
 ```
 
@@ -76,7 +76,7 @@ init_worker_by_lua_block {
 
 ```
 log_by_lua_block {
-    metrix.handle_ngx_phase()
+  metrix.handle_ngx_phase()
 }
 ```
 
@@ -85,10 +85,10 @@ log_by_lua_block {
 &nbsp;&nbsp;&nbsp;&nbsp;1\. Специальный `location` в имеющихся виртуалхостах (`server`):
 ```
 location /metrix/ {
-    default_type 'text/plain';
-    content_by_lua_block {
-        metrix.show()
-    }
+  default_type 'text/plain';
+  content_by_lua_block {
+    metrix.show()
+  }
 }
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;2\. Отдельный виртуалхост (`server`):
@@ -101,7 +101,7 @@ server {
     location / {
         default_type 'text/plain';
         content_by_lua_block {
-            metrix.show({vhosts_filter='.*'})
+          metrix.show({vhosts_filter='.*'})
         }
     }
 }
@@ -127,14 +127,14 @@ server {
 Расширение функционала
 ----------------------
 
-См. [CUSTOMIZING.md](./CUSTOMIZING.md).
+Инстукция по созданию собственных метрик [COOKBOOK-COLLECTORS.md](https://github.com/bankiru/nginx-metrix/blob/master/doc/COOKBOOK-COLLECTORS.md).
 
 Помощь проекту
 --------------
 
-См. [CONTRIBUTING.md](./CONTRIBUTING.md). Приветствуются любые вопросы, предложения и пул-реквесты.
+См. [CONTRIBUTING.md](https://github.com/bankiru/nginx-metrix/blob/master/CONTRIBUTING.md). Приветствуются любые вопросы, предложения и пул-реквесты.
 
 Лицензия
 --------
 
-Авторские права 2016 ООО «Информационное агентство «Банки.ру». Лицензия MIT. За подробностями обращайтесь к [LICENSE](./LICENSE).
+Авторские права 2016 ООО «Информационное агентство «Банки.ру». Лицензия MIT. За подробностями обращайтесь к [LICENSE](https://github.com/bankiru/nginx-metrix/blob/master/LICENSE).

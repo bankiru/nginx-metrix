@@ -35,34 +35,46 @@ Usage
 Nginx with lua-nginx-module should be installed using their instructions.
 
 ### Install nginx metrix module
+There are two ways to install: globally and locally.
 
+**Global installation**
 ```
 luarocks install nginx-metrix
 ```
 
+**Local installation**
+```
+luarocks install nginx-metrix --local
+```
+
+*There is a little trick that allows you to setup into an arbitrary folder - specify the HOME environment variable when running `luarocks install`*
+
 ### Configure nginx
 
-Put into `http` section
+1\. Put into `http` section
 
 ```
-lua_shared_dict metrix 128m;
+lua_shared_dict metrix 16m; # creating metrix storage in nginx shared memory. Usually 16 megabytes should be enough
 
-lua_package_path '/etc/nginx/?.lua;;';
-lua_package_cpath '/etc/nginx/?.so;;';
+#lua_package_path '/home/user/.luarocks/share/lua/5.1/?.lua;;'; # Needs only if metrix installed locally
+#lua_package_cpath '/home/user/.luarocks/lib/lua/5.1/?.so;;';   # Needs only if metrix installed locally
 
+# init metrix
+# In vhosts parameter you can (but not necessary) list all the primary server_name of virtual hosts
 init_by_lua_block {
-    metrix = require 'nginx-metrix.main'({
-        shared_dict = 'metrix',
-        vhosts = {[[mydomain1]], [[mydomain2]], ...}
-    })
+  metrix = require 'nginx-metrix.main'({
+    shared_dict = 'metrix',
+    vhosts = {'mydomain1', 'mydomain2', ...}
+  })
 }
 
+# init aggregating scheduler on workers
 init_worker_by_lua_block {
     metrix.init_scheduler()
 }
 ```
 
-Put into every `server` section
+2\. Put into every `server` section
 
 ```
 log_by_lua_block {
@@ -70,19 +82,18 @@ log_by_lua_block {
 }
 ```
 
-To collect stats you should add special location to existing or separate `server` section.
+3\. There are two ways to output collected stats
 
-Location for existing `server`s:
+&nbsp;&nbsp;&nbsp;&nbsp;1\. Special location in the existing `server` section.
 ```
 location /metrix/ {
-    default_type 'text/plain';
-    content_by_lua_block {
-        metrix.show()
-    }
+  default_type 'text/plain';
+  content_by_lua_block {
+    metrix.show()
+  }
 }
 ```
-
-Separate `server`:
+&nbsp;&nbsp;&nbsp;&nbsp;2\. Separate virtual host (`server`):
 
 ```
 server {
@@ -92,7 +103,7 @@ server {
     location / {
         default_type 'text/plain';
         content_by_lua_block {
-            metrix.show({vhosts_filter='.*'})
+          metrix.show({vhosts_filter='.*'})
         }
     }
 }
@@ -100,9 +111,15 @@ server {
 
 ### See or collect stats
 
-You can see stats in `text`, `html` and `json` formats.
+Stats can be
 
-Format determines by `Accept` http header or by parameter `format`.
+Statistics can be viewed in the browser or obtain using various tools.
+
+
+
+Supported formats: `text`(default), `html` and `json`.
+
+Format determines by `Accept` http header or by `format` parameter.
 
 If you are using existing `server` with special location you will see stats about this vhost.
 If you are using separate `server` stats for all existing (collected) vhosts will be showed.
@@ -111,20 +128,14 @@ If you want to see stats about only one you should pass parameter `vhost=yourdom
 Extending
 ---------
 
-TODO: write how to extend metrix
-
+Cookbook about creating custom metrics: [COOKBOOK-COLLECTORS.md](https://github.com/bankiru/nginx-metrix/blob/master/doc/COOKBOOK-COLLECTORS.md).
 
 Contributing
 ------------
 
-See CONTRIBUTING.md. All issues, suggestions, and most importantly pull requests are welcome.
-
-Testing
--------
-
-Run `busted` (http://olivinelabs.com/busted/)
+See [CONTRIBUTING.md](https://github.com/bankiru/nginx-metrix/blob/master/CONTRIBUTING.md). All issues, suggestions, and most importantly pull requests are welcome.
 
 Licence
 -------
 
-Copyright 2016 Banki.ru News Agency, Ltd. MIT licensed. See LICENSE for details.
+Copyright 2016 Banki.ru News Agency, Ltd. MIT licensed. See [LICENSE](https://github.com/bankiru/nginx-metrix/blob/master/LICENSE) for details.

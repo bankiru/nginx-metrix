@@ -1,7 +1,7 @@
 package = 'nginx-metrix'
 version = 'scm-1'
 source = {
-  url = "https://github.com/bankiru/nginx-metrix.git",
+  url = "git://github.com/bankiru/nginx-metrix.git",
   branch = "1.0-dev"
 }
 description = {

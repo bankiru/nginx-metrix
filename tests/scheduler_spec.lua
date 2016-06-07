@@ -22,7 +22,10 @@ describe('scheduler', function()
         spawn = function() end,
         wait = function() end,
       },
-      now = function() return os.time() end,
+      worker = {
+        id = function() return 13 end,
+        pid = function() return 113 end,
+      },
     }
   end)
 
@@ -94,19 +97,9 @@ describe('scheduler', function()
     assert.is_equal(1, length(scheduler.__private__.collectors()))
   end)
 
-  it('start failed because worker_id', function()
-    local worker_id = 13
-    dict_mock.safe_incr.on_call_with('worker_id').returns(nil, 'test error')
-
-    assert.is_false(scheduler.start())
-    assert.spy(_G.ngx.timer.at).was_not.called()
-    assert.spy(logger.error).was.called_with('Can not make worker_id', 'test error')
-    assert.spy(logger.error).was.called(1)
-  end)
-
   it('start failed because timer', function()
     local worker_id = 13
-    dict_mock.safe_incr.on_call_with('worker_id').returns(worker_id, nil)
+    stub.new(_G.ngx.worker, 'id').on_call_with().returns(worker_id)
     stub.new(_G.ngx.timer, 'at').on_call_with(1, match.is_function(), {}, worker_id).returns(false, 'test error')
 
     assert.is_false(scheduler.start())
@@ -118,7 +111,7 @@ describe('scheduler', function()
 
   it('start without collectors', function()
     local worker_id = 13
-    dict_mock.safe_incr.on_call_with('worker_id').returns(worker_id, nil)
+    stub.new(_G.ngx.worker, 'id').on_call_with().returns(worker_id)
     stub.new(_G.ngx.timer, 'at').on_call_with(1, match.is_function(), {}, worker_id).returns(true, nil)
 
     assert.is_true(scheduler.start())
@@ -131,7 +124,7 @@ describe('scheduler', function()
     scheduler.attach_collector(test_collector)
 
     local worker_id = 13
-    dict_mock.safe_incr.on_call_with('worker_id').returns(worker_id, nil)
+    stub.new(_G.ngx.worker, 'id').on_call_with().returns(worker_id)
     stub.new(_G.ngx.timer, 'at').on_call_with(1, match.is_function(), { test_collector }, worker_id).returns(true, nil)
 
     assert.is_true(scheduler.start())
@@ -141,7 +134,7 @@ describe('scheduler', function()
   end)
 
   it('handler on premature call', function()
-    local process_stub = mock({process = function() end}).process
+    local process_stub = mock({ process = function() end }).process
     scheduler.__private__._process(process_stub)
 
     scheduler.__private__.handler(true, {}, 1)
@@ -153,7 +146,7 @@ describe('scheduler', function()
   it('handler failed to start next iter', function()
     local worker_id = 13
 
-    local process_stub = mock({process = function() end}).process
+    local process_stub = mock({ process = function() end }).process
     scheduler.__private__._process(process_stub)
 
     namespaces.list.on_call_with().returns({})
@@ -193,7 +186,7 @@ describe('scheduler', function()
 
     dict_mock.add.on_call_with(scheduler.__private__.lock_key(), scheduler.__private__.lock_key(), scheduler.__private__.lock_timeout()).returns(false, 'exists', false)
 
-    scheduler.__private__.process({[[collector]]}, {'example.com'}, worker_id)
+    scheduler.__private__.process({ [[collector]] }, { 'example.com' }, worker_id)
 
     assert.spy(dict_mock.add).was.called_with(scheduler.__private__.lock_key(), scheduler.__private__.lock_key(), scheduler.__private__.lock_timeout())
     assert.spy(dict_mock.add).was.called(1)
@@ -213,8 +206,6 @@ describe('scheduler', function()
     stub.new(_G.ngx.thread, 'spawn').on_call_with(match.is_function()).returns(thread)
     stub.new(_G.ngx.thread, 'wait').on_call_with(thread).returns(false, 'test error')
     stub.new(_G.ngx.timer, 'at').on_call_with(1, match.is_function(), { test_collector }, {'example.com'} , worker_id).returns(true, nil)
-
---    logger.error.on_call_with(match._, match._).invokes(function(...) print(require 'inspect'({...})) end)
 
     scheduler.__private__.process({ test_collector }, {'example.com'}, worker_id)
 
@@ -239,8 +230,6 @@ describe('scheduler', function()
 
     stub.new(_G.ngx.thread, 'spawn').on_call_with(match.is_function()).invokes(function(func) thread.func = func; return thread end)
     stub.new(_G.ngx.thread, 'wait').on_call_with(match._).invokes(function(thread) thread.func(); return true, nil end)
-
-    logger.error.on_call_with(match._, match._).invokes(function(...) print(require 'inspect'({...})) end)
 
     scheduler.__private__.process({ test_collector }, {'first.com', 'second.org'}, worker_id)
 

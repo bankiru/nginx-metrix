@@ -9,7 +9,7 @@ local log = function(level, msg, ...)
         msg = msg .. ' :: ' .. inspect({ ... })
     end
 
-    ngx.log(level, msg)
+    ngx.log(level, '[metrix] ' .. msg)
 end
 
 local stderr = function(...)

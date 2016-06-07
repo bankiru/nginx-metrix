@@ -1,1 +1,1 @@
-return '1.0-rc6'
+return '1.0.0'

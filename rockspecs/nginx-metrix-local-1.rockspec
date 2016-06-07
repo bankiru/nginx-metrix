@@ -2,7 +2,7 @@ package = 'nginx-metrix'
 version = 'local-1'
 source = {
   url = "file://nginx-metrix/",
-  dir = "nginx-metrix"
+  dir = "nginx-metrix",
 }
 description = {
   summary    = 'Extended Nginx status and metrics.',

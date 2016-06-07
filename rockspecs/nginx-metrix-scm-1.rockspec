@@ -1,8 +1,9 @@
 package = 'nginx-metrix'
 version = 'scm-1'
 source = {
-  url = "git://github.com/bankiru/nginx-metrix.git",
-  branch = "1.0-dev"
+  url    = "git://github.com/bankiru/nginx-metrix.git",
+  branch = "master",
+  dir    = 'nginx-metrix',
 }
 description = {
   summary    = 'Extended Nginx status and metrics.',

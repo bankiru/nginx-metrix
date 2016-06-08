@@ -1,5 +1,6 @@
 local logger = require 'nginx-metrix.logger'
 local dict = require 'nginx-metrix.storage.dict'
+local namespaces = require 'nginx-metrix.storage.namespaces'
 
 local collectors = {}
 
@@ -21,9 +22,17 @@ local setup_lock = function()
   return (dict.add(lock_key, lock_key, lock_timeout))
 end
 
-local process = function(collectors_list, worker_id)
-  if length(collectors_list) == 0 then
+local process = function(collectors_list, namespaces_list, worker_id)
+  local col_count = length(collectors_list)
+  local ns_count = length(namespaces_list)
+
+  if col_count == 0 then
     logger.debug(("[scheduler #%s] collectors list is empty, skipping"):format(worker_id))
+    return
+  end
+
+  if ns_count == 0 then
+    logger.debug(("[scheduler #%s] namespaces list is empty, skipping"):format(worker_id))
     return
   end
 
@@ -33,25 +42,31 @@ local process = function(collectors_list, worker_id)
   end
 
   logger.debug(("[scheduler #%s] lock obtained, aggregating"):format(worker_id))
-  iter(collectors_list):map(
-    function(collector)
-      logger.debug(("[scheduler #%s] spawned thread for Collector<%s>"):format(worker_id, collector.name))
-      return collector, ngx.thread.spawn(function()
-        logger.debug(("[scheduler #%s] thread processing started for Collector<%s>"):format(worker_id, collector.name))
+
+  local col_ns_thread_iter = take(
+    col_count * ns_count,
+    tabulate(function(x)
+      local collector = collectors_list[operator.intdiv(x, ns_count) + 1]
+      local namespace = namespaces_list[operator.mod(x, ns_count) + 1]
+      local thread = ngx.thread.spawn(function()
+        logger.debug(("[scheduler #%s] thread processing started for Collector<%s> on namespace '%s'"):format(worker_id, collector.name, namespace))
+        namespaces.activate(namespace)
         collector:aggregate()
-        logger.debug(("[scheduler #%s] thread processing finished for Collector<%s>"):format(worker_id, collector.name))
+        logger.debug(("[scheduler #%s] thread processing finished for Collector<%s> on namespace '%s'"):format(worker_id, collector.name, namespace))
       end)
-    end
-  ):each(
-    function(collector, thread)
-      local ok, res = ngx.thread.wait(thread)
-      if not ok then
-        logger.error(("[scheduler #%s] failed to run Collector<%s>:aggregate()"):format(worker_id, collector.name), res)
-      else
-        logger.debug(("[scheduler #%s] thread finished for Collector<%s>"):format(worker_id, collector.name))
-      end
-    end
+      logger.debug(("[scheduler #%s] spawned thread for Collector<%s> on namespace '%s'"):format(worker_id, collector.name, namespace))
+      return collector, namespace, thread
+    end)
   )
+
+  col_ns_thread_iter:each(function(collector, namespace, thread)
+    local ok, res = ngx.thread.wait(thread)
+    if not ok then
+      logger.error(("[scheduler #%s] failed to run Collector<%s>:aggregate() on namespace '%s'"):format(worker_id, collector.name, namespace), res)
+    else
+      logger.debug(("[scheduler #%s] thread finished for Collector<%s> on namespace '%s'"):format(worker_id, collector.name, namespace))
+    end
+  end)
 end
 
 local handler
@@ -63,7 +78,7 @@ handler = function(premature, collectors_list, worker_id)
 
   local ok, err
 
-  process(collectors_list, worker_id)
+  process(collectors_list, namespaces.list(), worker_id)
 
   ok, err = ngx.timer.at(delay, handler, collectors_list, worker_id)
   if not ok then

@@ -3,6 +3,7 @@ require('tests.bootstrap')(assert)
 describe('scheduler', function()
   local scheduler
   local dict_mock
+  local namespaces
   local logger
   local match
 
@@ -11,6 +12,7 @@ describe('scheduler', function()
     match = require 'luassert.match'
 
     dict_mock = require 'nginx-metrix.storage.dict'
+    namespaces = require 'nginx-metrix.storage.namespaces'
 
     _G.ngx = {
       timer = {
@@ -26,6 +28,8 @@ describe('scheduler', function()
 
   teardown(function()
     mock.revert(dict_mock)
+    mock.revert(namespaces)
+    package.loaded['nginx-metrix.storage.namespaces'] = nil
     package.loaded['nginx-metrix.storage.dict'] = nil
     package.loaded['nginx-metrix.logger'] = nil
     _G.ngx = nil
@@ -35,6 +39,7 @@ describe('scheduler', function()
     mock(_G.ngx)
 
     mock(dict_mock, true)
+    mock(namespaces, true)
     package.loaded['nginx-metrix.storage.dict'] = dict_mock
 
     scheduler = require 'nginx-metrix.scheduler'
@@ -151,11 +156,12 @@ describe('scheduler', function()
     local process_stub = mock({process = function() end}).process
     scheduler.__private__._process(process_stub)
 
+    namespaces.list.on_call_with().returns({})
     stub.new(_G.ngx.timer, 'at').on_call_with(1, match.is_function(), {}, worker_id).returns(false, 'test error')
 
     scheduler.__private__.handler(false, {}, worker_id)
 
-    assert.spy(process_stub).was.called_with({}, worker_id)
+    assert.spy(process_stub).was.called_with({}, {}, worker_id)
     assert.spy(process_stub).was.called(1)
 
     assert.spy(logger.error).was.called_with('[scheduler #' .. worker_id .. '] Failed to continue the scheduler - failed to create the timer', 'test error')
@@ -165,11 +171,21 @@ describe('scheduler', function()
   it('process without collectors', function()
     local worker_id = 13
 
-    scheduler.__private__.process({}, worker_id)
+    scheduler.__private__.process({}, {}, worker_id)
 
     assert.spy(dict_mock.add).was_not.called()
     assert.spy(logger.error).was_not.called()
     assert.spy(logger.debug).was.called_with('[scheduler #' .. worker_id .. '] collectors list is empty, skipping')
+  end)
+
+  it('process without namespaces', function()
+    local worker_id = 13
+
+    scheduler.__private__.process({[[collector]]}, {}, worker_id)
+
+    assert.spy(dict_mock.add).was_not.called()
+    assert.spy(logger.error).was_not.called()
+    assert.spy(logger.debug).was.called_with('[scheduler #' .. worker_id .. '] namespaces list is empty, skipping')
   end)
 
   it('process skips if can not setup lock', function()
@@ -177,7 +193,7 @@ describe('scheduler', function()
 
     dict_mock.add.on_call_with(scheduler.__private__.lock_key(), scheduler.__private__.lock_key(), scheduler.__private__.lock_timeout()).returns(false, 'exists', false)
 
-    scheduler.__private__.process({[[collector]]}, worker_id)
+    scheduler.__private__.process({[[collector]]}, {'example.com'}, worker_id)
 
     assert.spy(dict_mock.add).was.called_with(scheduler.__private__.lock_key(), scheduler.__private__.lock_key(), scheduler.__private__.lock_timeout())
     assert.spy(dict_mock.add).was.called(1)
@@ -196,9 +212,11 @@ describe('scheduler', function()
 
     stub.new(_G.ngx.thread, 'spawn').on_call_with(match.is_function()).returns(thread)
     stub.new(_G.ngx.thread, 'wait').on_call_with(thread).returns(false, 'test error')
-    stub.new(_G.ngx.timer, 'at').on_call_with(1, match.is_function(), { test_collector }, worker_id).returns(true, nil)
+    stub.new(_G.ngx.timer, 'at').on_call_with(1, match.is_function(), { test_collector }, {'example.com'} , worker_id).returns(true, nil)
 
-    scheduler.__private__.process({ test_collector }, worker_id)
+--    logger.error.on_call_with(match._, match._).invokes(function(...) print(require 'inspect'({...})) end)
+
+    scheduler.__private__.process({ test_collector }, {'example.com'}, worker_id)
 
     assert.spy(dict_mock.add).was.called_with(scheduler.__private__.lock_key(), scheduler.__private__.lock_key(), scheduler.__private__.lock_timeout())
     assert.spy(dict_mock.add).was.called(1)
@@ -206,7 +224,7 @@ describe('scheduler', function()
     assert.spy(_G.ngx.thread.spawn).was.called_with(match.is_function())
     assert.spy(_G.ngx.thread.wait).was.called_with(thread)
 
-    assert.spy(logger.error).was.called_with('[scheduler #' .. worker_id .. '] failed to run Collector<test>:aggregate()', 'test error')
+    assert.spy(logger.error).was.called_with("[scheduler #" .. worker_id .. "] failed to run Collector<test>:aggregate() on namespace 'example.com'", 'test error')
     assert.spy(logger.error).was.called(1)
   end)
 
@@ -224,14 +242,19 @@ describe('scheduler', function()
 
     logger.error.on_call_with(match._, match._).invokes(function(...) print(require 'inspect'({...})) end)
 
-    scheduler.__private__.process({ test_collector }, worker_id)
+    scheduler.__private__.process({ test_collector }, {'first.com', 'second.org'}, worker_id)
 
     assert.spy(dict_mock.add).was.called_with(scheduler.__private__.lock_key(), scheduler.__private__.lock_key(), scheduler.__private__.lock_timeout())
     assert.spy(dict_mock.add).was.called(1)
 
     assert.spy(_G.ngx.thread.spawn).was.called_with(match.is_function())
     assert.spy(_G.ngx.thread.wait).was.called_with(thread)
-    assert.spy(test_collector.aggregate).was.called(1)
+    assert.spy(test_collector.aggregate).was.called(2)
+
+    assert.spy(namespaces.list).was.called(1)
+    assert.spy(namespaces.activate).was.called_with('first.com')
+    assert.spy(namespaces.activate).was.called_with('second.org')
+    assert.spy(namespaces.activate).was.called(2)
 
     assert.spy(logger.error).was_not.called()
   end)

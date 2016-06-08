@@ -90,11 +90,7 @@ end
 ---
 -- @return bool
 local start = function()
-  local worker_id, incr_err = dict.safe_incr('worker_id')
-  if incr_err ~= nil then
-    logger.error('Can not make worker_id', incr_err)
-    return false
-  end
+  local worker_id = ngx.worker.id()
 
   logger.debug(('[scheduler #%s] starting'):format(worker_id))
 

@@ -135,6 +135,7 @@ describe('main', function()
         stub(ngx, 'say')
 
         metrix.show({vhosts_filter='.*'})
+        metrix.handle_ngx_phase('log')
         assert.spy(ngx.say).was.called(1)
         assert.spy(ngx.say).was.called_with(match.json_equal({
             ['service'] = "nginx-metrix",
@@ -147,6 +148,7 @@ describe('main', function()
         stub(ngx, 'say')
 
         metrix.show({vhosts_filter='first.com'})
+        metrix.handle_ngx_phase('log')
         assert.spy(ngx.say).was.called(1)
         assert.spy(ngx.say).was.called_with(match.json_equal({
             ['service'] = "nginx-metrix",
@@ -154,5 +156,8 @@ describe('main', function()
             ['vhost'] = "first.com",
         }))
         ngx.say:revert()
+
+        metrix.handle_ngx_phase('log')
+
     end)
 end)

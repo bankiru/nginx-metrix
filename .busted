@@ -1,7 +1,7 @@
 return {
   _all = {
     coverage = true,
-    ROOT = { "tests" },
+    ROOT = { "spec" },
     ['sort-files'] = true,
   },
   default = {

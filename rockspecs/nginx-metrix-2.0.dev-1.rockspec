@@ -24,7 +24,7 @@ dependencies = {
 build = {
   type = "builtin",
   modules = {
-    ['nginx-metrix.main']                              = 'nginx-metrix/main.lua',
+    ['nginx-metrix.main']                              = 'nginx-metrix/nginx-metrix.lua',
 
     ['nginx-metrix.collectors']                        = 'nginx-metrix/collectors.lua',
     ['nginx-metrix.listener']                          = 'nginx-metrix/listener.lua',

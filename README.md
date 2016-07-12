@@ -66,7 +66,8 @@ lua_shared_dict metrix 16m; # creating metrix storage in nginx shared memory. Us
 init_by_lua_block {
   metrix = require 'nginx-metrix.main'({
     shared_dict = 'metrix',
-    vhosts = {'mydomain1', 'mydomain2', ...}
+    vhosts = {'mydomain1', 'mydomain2', ...},
+    window_size = 10,
   })
 }
 

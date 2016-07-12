@@ -1,10 +1,12 @@
 require('tests.bootstrap')(assert)
 
 describe('storage.collector_wrapper_factory', function()
+  local match
 
   local namespaces
   local dict_mock
   local factory
+  local Window
 
   local mk_wrapper_metatable_mock = function(name)
     local wrapper_metatable = copy(factory.__private__.wrapper_metatable)
@@ -15,12 +17,17 @@ describe('storage.collector_wrapper_factory', function()
   end
 
   setup(function()
+    match = require 'luassert.match'
+
     package.loaded['nginx-metrix.storage.dict'] = nil
     dict_mock = mock(require 'nginx-metrix.storage.dict', true)
     package.loaded['nginx-metrix.storage.dict'] = dict_mock
 
     package.loaded['nginx-metrix.storage.namespaces'] = nil
     namespaces = require 'nginx-metrix.storage.namespaces'
+
+    package.loaded['nginx-metrix.storage.window'] = nil
+    Window = require 'nginx-metrix.storage.window'
 
     package.loaded['nginx-metrix.storage.collector_wrapper_factory'] = nil
     factory = require 'nginx-metrix.storage.collector_wrapper_factory'
@@ -29,6 +36,7 @@ describe('storage.collector_wrapper_factory', function()
   teardown(function()
     mock.revert(dict_mock)
     package.loaded['nginx-metrix.storage.dict'] = nil
+    package.loaded['nginx-metrix.storage.window'] = nil
 
     package.loaded['nginx-metrix.storage.collector_wrapper_factory'] = nil
   end)
@@ -36,6 +44,7 @@ describe('storage.collector_wrapper_factory', function()
   after_each(function()
     namespaces.reset_active()
     mock.clear(dict_mock)
+    _G.ngx = nil
   end)
 
   it('create', function()
@@ -237,6 +246,95 @@ describe('storage.collector_wrapper_factory', function()
     assert.spy(dict_mock.get).was.called_with('collector_mock¦test-key^^next^^')
     assert.spy(dict_mock.delete).was.called_with('collector_mock¦test-key^^next^^')
     assert.spy(dict_mock.set).was.called_with('collector_mock¦test-key', 7, 0, 0)
+
+    dict_mock.get:revert()
+  end)
+
+  it('wrapper_metatable.cyclic_flush [non existent, window]', function()
+    factory.set_window_size(10)
+
+    local wrapper_metatable = mk_wrapper_metatable_mock('collector-mock')
+
+    stub.new(dict_mock, 'get').on_call_with('collector_mock¦test-key^^next^^').returns(nil, 0)
+    local sik = stub.new(Window.__private__.WindowItem, 'create_key')
+    sik.on_call_with().returns('11111111111111111111111111111111')
+
+    wrapper_metatable:cyclic_flush('test-key', true)
+    assert.spy(dict_mock.get).was.called_with('collector_mock¦test-key^^next^^')
+    assert.spy(dict_mock.delete).was.called_with('collector_mock¦test-key^^next^^')
+    assert.spy(dict_mock.set).was.called_with('collector_mock¦test-key', 0, 0, 0)
+
+    dict_mock.get:revert()
+    sik:revert()
+  end)
+
+  it('wrapper_metatable.cyclic_flush [existent, window]', function()
+    factory.set_window_size(10)
+
+    local wrapper_metatable = mk_wrapper_metatable_mock('collector-mock')
+
+    local test_data_wi = {
+      ['11111111111111111111111111111111'] = {
+        _key = '11111111111111111111111111111111',
+        _payload = 7,
+      },
+      ['22222222222222222222222222222222'] = {
+        _key = '22222222222222222222222222222222',
+        _payload = 13,
+      },
+    }
+
+    local test_data = {
+      {
+        wikey = '11111111111111111111111111111111',
+        window = nil,
+      },
+      {
+        wikey = '22222222222222222222222222222222',
+        window = {
+          _head = "11111111111111111111111111111111",
+          _limit = 10,
+          _name = "collector_mock¦test-key",
+          _size = 1,
+          _tail = "11111111111111111111111111111111",
+        },
+      },
+    }
+
+    local test_data_index;
+
+    _G.ngx = mock({ now = function() end, md5 = function() end }, true)
+    _G.ngx.now.on_call_with().returns(os.time())
+    _G.ngx.md5.on_call_with(match._).invokes(function()
+      return test_data[test_data_index].wikey
+    end)
+
+    --    stub.new(dict_mock, 'get').on_call_with('collector_mock¦test-key^^next^^').returns(7)
+    stub.new(dict_mock, 'get').on_call_with(match._).invokes(function(key)
+      local ret_val
+      if key == 'collector_mock¦test-key^^next^^' then
+        ret_val = test_data_wi[test_data[test_data_index].wikey]._payload
+      elseif key:match('^WindowItem') then
+        ret_val = test_data_wi[key:sub(12)]
+      elseif key:match('^Window') then
+        ret_val = test_data[test_data_index].window
+      end
+--      print('dict.get(' .. key .. ') => ' .. require 'inspect'(ret_val, { depth = 1 }))
+      return ret_val
+    end)
+    stub.new(dict_mock, 'set').on_call_with(match._, match._).invokes(function(...)
+--      print('dict.set(' .. require 'inspect'({ ... }, { depth = 2 }) .. ')')
+    end)
+
+    test_data_index = 1
+    wrapper_metatable:cyclic_flush('test-key', true)
+    test_data_index = 2
+    wrapper_metatable:cyclic_flush('test-key', true)
+
+    assert.spy(dict_mock.get).was.called_with('collector_mock¦test-key^^next^^')
+    assert.spy(dict_mock.delete).was.called_with('collector_mock¦test-key^^next^^')
+    assert.spy(dict_mock.set).was.called_with('collector_mock¦test-key', 7, 0, 0)
+    assert.spy(dict_mock.set).was.called_with('collector_mock¦test-key', 10, 0, 0)
 
     dict_mock.get:revert()
   end)

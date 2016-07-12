@@ -1,8 +1,11 @@
 local namespaces = require 'nginx-metrix.storage.namespaces'
 local storage_dict = require 'nginx-metrix.storage.dict'
+local Window = require 'nginx-metrix.storage.window'
 
 local key_sep_namespace = 'ː'
 local key_sep_collector = '¦'
+
+local global_window_size
 
 ---
 -- @param str
@@ -174,11 +177,24 @@ end
 ---
 -- @param key string
 ---
-wrapper_metatable.cyclic_flush = function(self, key)
+wrapper_metatable.cyclic_flush = function(self, key, use_window)
   key = self:prepare_key(key)
   local next_key = key .. '^^next^^'
   local next_value = storage_dict.get(next_key) or 0
   storage_dict.delete(next_key)
+
+  if use_window then
+    local window_size = use_window
+    if window_size == true then
+      window_size = global_window_size
+    end
+    if window_size ~= nil and window_size > 1 then
+      local window = Window.open(key, window_size)
+      window:push(next_value)
+      next_value = sum(window:totable()) / window:size()
+    end
+  end
+
   storage_dict.set(key, next_value, 0, 0)
 end
 
@@ -196,12 +212,21 @@ local create = function(collector)
   return wrapper
 end
 
+---
+-- @param window_size
+--
+local set_window_size = function(window_size)
+  assert(window_size == nil or window_size > 0, 'window_size can be nil or int grater then 0')
+  global_window_size = window_size
+end
+
 --------------------------------------------------------------------------------
 -- EXPORTS
 --------------------------------------------------------------------------------
 
 local exports = {}
 exports.create = create
+exports.set_window_size = set_window_size
 
 if __TEST__ then
   exports.__private__ = {

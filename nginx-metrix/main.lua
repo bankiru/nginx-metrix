@@ -107,6 +107,8 @@ setmetatable(exports, {
             namespaces.init({namespaces=options.vhosts})
         end
 
+        collectors.set_window_size(options.window_size)
+
         if not options.skip_register_builtin_collectors then
             self:register_builtin_collectors()
         end

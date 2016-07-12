@@ -1,8 +1,8 @@
 package = 'nginx-metrix'
-version = '1.0.1-1'
+version = '1.1.0-1'
 source = {
-  url = 'https://github.com/bankiru/nginx-metrix/archive/v1.0.1.tar.gz',
-  dir = 'nginx-metrix-1.0.1',
+  url = 'https://github.com/bankiru/nginx-metrix/archive/v1.1.0.tar.gz',
+  dir = 'nginx-metrix-1.1.0',
 }
 description = {
   summary    = 'Extended Nginx status and metrics.',

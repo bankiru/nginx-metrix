@@ -1,4 +1,4 @@
-local fun = require 'fun'
+--local fun = require 'fun'
 local Logger = require 'nginx-metrix.logger'
 
 local M = {}

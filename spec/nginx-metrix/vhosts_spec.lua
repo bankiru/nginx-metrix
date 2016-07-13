@@ -9,45 +9,45 @@ describe('nginx-metrix.vhosts', function()
 
   ---------------------------------------------------------------------------
   it('__call', function()
-    local stub_init = stub.new(vhosts, 'init')
+    stub(vhosts, 'init')
     local options_emu = { some_option = 'some_value' }
     local storage_emu = { 'storage' }
 
     vhosts(options_emu, storage_emu)
 
-    assert.spy(stub_init).was_called_with(options_emu, storage_emu)
+    assert.spy(vhosts.init).was_called_with(options_emu, storage_emu)
 
-    stub_init:revert()
+    vhosts.init:revert()
   end)
 
   it('init', function()
-    local stub_add = stub.new(vhosts, 'add')
+    stub(vhosts, 'add')
     local storage_emu = { 'storage' }
 
     vhosts.init({}, storage_emu)
-    assert.spy(stub_add).was_not_called()
+    assert.spy(vhosts.add).was_not_called()
     assert.is_equal(storage_emu, vhosts._storage)
 
     vhosts.init({ vhosts = nil }, storage_emu)
-    assert.spy(stub_add).was_not_called()
+    assert.spy(vhosts.add).was_not_called()
 
     vhosts.init({ vhosts = false }, storage_emu)
-    assert.spy(stub_add).was_not_called()
+    assert.spy(vhosts.add).was_not_called()
 
     assert.has_error(function()
       vhosts.init({ vhosts = 'invalid type' }, storage_emu)
     end, 'Invalid option `vhosts`. Expected table, got string.')
-    assert.spy(stub_add).was_not_called()
+    assert.spy(vhosts.add).was_not_called()
 
     vhosts.init({ vhosts = {} }, storage_emu)
-    assert.spy(stub_add).was_called_with({})
+    assert.spy(vhosts.add).was_called_with({})
 
     vhosts.init({ vhosts = { 'vhost1' } }, storage_emu)
-    assert.spy(stub_add).was_called_with({ 'vhost1' })
+    assert.spy(vhosts.add).was_called_with({ 'vhost1' })
 
-    assert.spy(stub_add).was_called(2)
+    assert.spy(vhosts.add).was_called(2)
 
-    stub_add:revert()
+    vhosts.add:revert()
   end)
 
   it('_store', function()

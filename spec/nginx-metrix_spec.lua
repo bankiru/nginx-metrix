@@ -13,31 +13,31 @@ describe('nginx-metrix', function()
   end)
 
   it('__call', function()
-    local stub_init = stub.new(nginx_metrix, 'init')
+    stub(nginx_metrix, 'init')
     local options_emu = { some_option = 'some_value' }
 
     nginx_metrix(options_emu)
 
-    assert.spy(stub_init).was_called_with(options_emu)
+    assert.spy(nginx_metrix.init).was_called_with(options_emu)
 
-    stub_init:revert()
+    nginx_metrix.init:revert()
   end)
 
   it('init', function()
-    local stub_init_storage = stub.new(nginx_metrix, 'init_storage')
-    local stub_init_vhosts = stub.new(nginx_metrix, 'init_vhosts')
-    local stub_init_builtin_collectors = stub.new(nginx_metrix, 'init_builtin_collectors')
+    stub(nginx_metrix, 'init_storage')
+    stub(nginx_metrix, 'init_vhosts')
+    stub(nginx_metrix, 'init_builtin_collectors')
     local options_emu = { some_option = 'some_value' }
 
     nginx_metrix.init(options_emu)
 
-    assert.spy(stub_init_storage).was_called_with(options_emu)
-    assert.spy(stub_init_vhosts).was_called_with(options_emu)
-    assert.spy(stub_init_builtin_collectors).was_called_with(options_emu)
+    assert.spy(nginx_metrix.init_storage).was_called_with(options_emu)
+    assert.spy(nginx_metrix.init_vhosts).was_called_with(options_emu)
+    assert.spy(nginx_metrix.init_builtin_collectors).was_called_with(options_emu)
 
-    stub_init_storage:revert()
-    stub_init_vhosts:revert()
-    stub_init_builtin_collectors:revert()
+    nginx_metrix.init_storage:revert()
+    nginx_metrix.init_vhosts:revert()
+    nginx_metrix.init_builtin_collectors:revert()
   end)
 
   it('init_storage', function()

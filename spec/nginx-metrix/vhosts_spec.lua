@@ -142,4 +142,47 @@ describe('nginx-metrix.vhosts', function()
 
     vhosts._restore:revert()
   end)
+
+  it('reset_active', function()
+    vhosts._active_vhost = 'vhost1'
+    vhosts.reset_active()
+    assert.is_nil(vhosts._active_vhost)
+  end)
+
+  it('active as getter', function()
+    stub(vhosts, 'add')
+
+    vhosts._active_vhost = 'vhost1'
+    local active_vhost = vhosts.active()
+    assert.is_equal(vhosts._active_vhost, active_vhost)
+    assert.spy(vhosts.add).was_not_called()
+
+    vhosts.add:revert()
+  end)
+
+  it('active as setter throws error on invalid arg', function()
+    stub(vhosts, 'add')
+
+    vhosts._active_vhost = 'vhost1'
+    assert.has_error(function()
+      vhosts.active({})
+    end, 'Invalid argument for vhosts.active(). Expected string or nil, got table.')
+    assert.is_equal('vhost1', vhosts._active_vhost)
+    assert.spy(vhosts.add).was_not_called()
+
+    vhosts.add:revert()
+  end)
+
+  it('active as setter', function()
+    stub(vhosts, 'add')
+
+    vhosts._active_vhost = 'vhost1'
+    local result = vhosts.active('vhost2')
+    assert.is_nil(result)
+    assert.is_equal('vhost2', vhosts._active_vhost)
+    assert.spy(vhosts.add).was_called_with('vhost2')
+    assert.spy(vhosts.add).was_called(1)
+
+    vhosts.add:revert()
+  end)
 end)

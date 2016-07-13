@@ -27,6 +27,7 @@ build = {
   type = "builtin",
   modules = {
     ['nginx-metrix']                              = 'src/nginx-metrix.lua',
+    ['nginx-metrix.vhosts']                       = 'src/nginx-metrix/vhosts.lua',
 
 --    ['nginx-metrix.collectors']                        = 'nginx-metrix/collectors.lua',
 --    ['nginx-metrix.listener']                          = 'nginx-metrix/listener.lua',

@@ -78,7 +78,7 @@ function M.active(vhost)
     return M._active_vhost
   end
 
-  assert(type(vhost) == 'string', 'Expected string or nil value for vhost, got ' .. type(vhost))
+  assert(type(vhost) == 'string', ('Invalid argument for vhosts.active(). Expected string or nil, got %s.'):format(type(vhost)))
 
   M._active_vhost = vhost
   M.add(vhost)

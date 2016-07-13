@@ -45,5 +45,6 @@ build = {
     ['nginx-metrix.storage.dict']                      = 'nginx-metrix/storage/dict.lua',
     ['nginx-metrix.storage.namespaces']                = 'nginx-metrix/storage/namespaces.lua',
     ['nginx-metrix.storage.serializer']                = 'nginx-metrix/storage/serializer.lua',
+    ['nginx-metrix.storage.window']                    = 'nginx-metrix/storage/window.lua',
   },
 }

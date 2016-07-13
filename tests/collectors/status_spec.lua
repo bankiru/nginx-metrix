@@ -23,15 +23,15 @@ describe('collectors.status', function()
     end)
 
     it('handles phase log', function()
-        assert.is_nil(collector.fields['499'])
+        assert.is_nil(collector.fields['777'])
 
         collector.storage = mock({cyclic_incr = function() end}, true)
-        _G.ngx = {status = 499}
+        _G.ngx = {status = 777}
         collector:on_phase('log')
 
         assert.spy(collector.storage.cyclic_incr).was.called(1)
-        assert.spy(collector.storage.cyclic_incr).was.called_with(collector.storage, 499)
+        assert.spy(collector.storage.cyclic_incr).was.called_with(collector.storage, 777)
 
-        assert.is_table(collector.fields['499'])
+        assert.is_table(collector.fields['777'])
     end)
 end)

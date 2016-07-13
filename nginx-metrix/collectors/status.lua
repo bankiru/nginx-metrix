@@ -10,18 +10,7 @@ local field_params = { format = '%d', cyclic = true, window = true, }
 
 local collector = {
   name = 'status',
-  fields = {
-    ['200'] = field_params,
-    ['301'] = field_params,
-    ['302'] = field_params,
-    ['304'] = field_params,
-    ['403'] = field_params,
-    ['404'] = field_params,
-    ['500'] = field_params,
-    ['502'] = field_params,
-    ['503'] = field_params,
-    ['504'] = field_params,
-  },
+  fields = {},
   ngx_phases = { [[log]] },
   on_phase = function(self, phase)
     if phase == 'log' and ngx.status ~= nil then
@@ -32,5 +21,18 @@ local collector = {
     end
   end,
 }
+
+each(
+  function(status)
+    collector.fields[tostring(status)] = field_params
+  end,
+  chain(
+    range(101, 103),
+    range(200, 208), {226},
+    range(300, 308),
+    range(400, 431), {451, 499},
+    range(500, 511), {599}
+  )
+)
 
 return collector

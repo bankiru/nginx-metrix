@@ -9,7 +9,7 @@ describe('nginx-metrix', function()
 
   ---------------------------------------------------------------------------
   it('version', function()
-    assert.is_equal('2.0-dev', nginx_metrix.version)
+    assert.is_equal('2.0-dev', nginx_metrix._version)
   end)
 
   it('__call', function()
@@ -51,7 +51,7 @@ describe('nginx-metrix', function()
 
     assert.spy(storage_module_mock).was_called_with(options)
     assert.spy(storage_module_mock).was_called(1)
-    assert.is_same(storage_emu, nginx_metrix.storage)
+    assert.is_same(storage_emu, nginx_metrix._storage)
 
     package.loaded['nginx-metrix.storage'] = nil
   end)
@@ -67,7 +67,7 @@ describe('nginx-metrix', function()
 
     assert.spy(vhosts_module_mock).was_called_with(options)
     assert.spy(vhosts_module_mock).was_called(1)
-    assert.is_same(vhosts_emu, nginx_metrix.vhosts)
+    assert.is_same(vhosts_emu, nginx_metrix._vhosts)
 
     package.loaded['nginx-metrix.vhosts'] = nil
   end)

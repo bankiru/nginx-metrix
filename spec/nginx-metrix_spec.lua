@@ -14,11 +14,11 @@ describe('nginx-metrix', function()
 
   it('__call', function()
     local stub_init = stub.new(nginx_metrix, 'init')
-    local options = { some_option = 'some_value' }
+    local options_emu = { some_option = 'some_value' }
 
-    nginx_metrix(options)
+    nginx_metrix(options_emu)
 
-    assert.spy(stub_init).was_called_with(options)
+    assert.spy(stub_init).was_called_with(options_emu)
 
     stub_init:revert()
   end)
@@ -27,13 +27,13 @@ describe('nginx-metrix', function()
     local stub_init_storage = stub.new(nginx_metrix, 'init_storage')
     local stub_init_vhosts = stub.new(nginx_metrix, 'init_vhosts')
     local stub_init_builtin_collectors = stub.new(nginx_metrix, 'init_builtin_collectors')
-    local options = { some_option = 'some_value' }
+    local options_emu = { some_option = 'some_value' }
 
-    nginx_metrix.init(options)
+    nginx_metrix.init(options_emu)
 
-    assert.spy(stub_init_storage).was_called_with(options)
-    assert.spy(stub_init_vhosts).was_called_with(options)
-    assert.spy(stub_init_builtin_collectors).was_called_with(options)
+    assert.spy(stub_init_storage).was_called_with(options_emu)
+    assert.spy(stub_init_vhosts).was_called_with(options_emu)
+    assert.spy(stub_init_builtin_collectors).was_called_with(options_emu)
 
     stub_init_storage:revert()
     stub_init_vhosts:revert()
@@ -43,13 +43,13 @@ describe('nginx-metrix', function()
   it('init_storage', function()
     local storage_emu = { 'storage' }
     local storage_module_mock = spy.new(function() return storage_emu end)
-    local options = { some_option = 'some_value' }
+    local options_emu = { some_option = 'some_value' }
 
     package.loaded['nginx-metrix.storage'] = storage_module_mock
 
-    nginx_metrix.init_storage(options)
+    nginx_metrix.init_storage(options_emu)
 
-    assert.spy(storage_module_mock).was_called_with(options)
+    assert.spy(storage_module_mock).was_called_with(options_emu)
     assert.spy(storage_module_mock).was_called(1)
     assert.is_same(storage_emu, nginx_metrix._storage)
 
@@ -59,13 +59,15 @@ describe('nginx-metrix', function()
   it('init_vhosts', function()
     local vhosts_emu = { 'vhosts' }
     local vhosts_module_mock = spy.new(function() return vhosts_emu end)
-    local options = { some_option = 'some_value' }
+    local options_emu = { some_option = 'some_value' }
+    local storage_emu = { 'storage' }
 
     package.loaded['nginx-metrix.vhosts'] = vhosts_module_mock
 
-    nginx_metrix.init_vhosts(options)
+    nginx_metrix.storage = storage_emu
+    nginx_metrix.init_vhosts(options_emu)
 
-    assert.spy(vhosts_module_mock).was_called_with(options)
+    assert.spy(vhosts_module_mock).was_called_with(options_emu, storage_emu)
     assert.spy(vhosts_module_mock).was_called(1)
     assert.is_same(vhosts_emu, nginx_metrix._vhosts)
 

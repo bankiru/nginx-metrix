@@ -1,6 +1,8 @@
 require('spec.bootstrap')(assert)
 
 describe('nginx-metrix', function()
+  local match = require 'luassert.match'
+
   local nginx_metrix
 
   setup(function()
@@ -24,6 +26,8 @@ describe('nginx-metrix', function()
   end)
 
   it('init', function()
+    nginx_metrix._inited = nil
+
     stub(nginx_metrix, 'init_storage')
     stub(nginx_metrix, 'init_vhosts')
     stub(nginx_metrix, 'init_builtin_collectors')
@@ -34,7 +38,37 @@ describe('nginx-metrix', function()
     assert.spy(nginx_metrix.init_storage).was_called_with(options_emu)
     assert.spy(nginx_metrix.init_vhosts).was_called_with(options_emu)
     assert.spy(nginx_metrix.init_builtin_collectors).was_called_with(options_emu)
+    assert.is_true(nginx_metrix._inited)
 
+    nginx_metrix.init_storage:revert()
+    nginx_metrix.init_vhosts:revert()
+    nginx_metrix.init_builtin_collectors:revert()
+  end)
+
+  it('init handles error', function()
+    nginx_metrix._inited = nil
+
+    stub(nginx_metrix, 'init_storage')
+    stub(nginx_metrix, 'init_vhosts')
+    stub(nginx_metrix, 'init_builtin_collectors')
+
+    nginx_metrix.init_storage.on_call_with({}).invokes(function() error('init_storage error') end)
+
+    local logger_bak = nginx_metrix._logger
+    nginx_metrix._logger = mock({ err = function() end })
+
+    assert.has_no_error(function()
+      nginx_metrix.init({})
+    end)
+
+    assert.spy(nginx_metrix.init_storage).was_called_with({})
+    assert.spy(nginx_metrix.init_storage).was_called(1)
+    assert.spy(nginx_metrix.init_vhosts).was_not_called()
+    assert.spy(nginx_metrix.init_builtin_collectors).was_not_called()
+    assert.spy(nginx_metrix._logger.err).was_called_with(nginx_metrix._logger, 'Init failed. Metrix disabled.', match.matches('init_storage error'))
+    assert.is_false(nginx_metrix._inited)
+
+    nginx_metrix._logger = logger_bak
     nginx_metrix.init_storage:revert()
     nginx_metrix.init_vhosts:revert()
     nginx_metrix.init_builtin_collectors:revert()

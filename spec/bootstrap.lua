@@ -1,6 +1,5 @@
 _G.__TEST__ = true
 
---local _ = package.loaded['fun'] or require 'fun'()
 require 'nginx-metrix.lib.is'()
 
 local copy
@@ -14,6 +13,10 @@ copy = function(obj, seen)
   return res
 end
 _G.copy = copy
+
+_G.print_inspected = function(...)
+  print(require 'inspect'(...))
+end
 
 local s = require('say') --our i18n lib, installed through luarocks, included as a luassert dependency
 
@@ -127,7 +130,7 @@ M.matchers["json_equal"] = function(_, arguments)
   return function(value)
     local is_eq = json_equal(value, arguments[1])
     if not is_eq then
-      print(require 'inspect'{ json1 = value, json2 = arguments[1] })
+      print_inspected{ json1 = value, json2 = arguments[1] }
     end
     return is_eq
   end

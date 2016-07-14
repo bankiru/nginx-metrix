@@ -28,6 +28,7 @@ build = {
   modules = {
     ['nginx-metrix'] = 'src/nginx-metrix.lua',
     ['nginx-metrix.logger'] = 'src/nginx-metrix/logger.lua',
+    ['nginx-metrix.serializer'] = 'src/nginx-metrix/serializer.lua',
     ['nginx-metrix.storage'] = 'src/nginx-metrix/storage.lua',
     ['nginx-metrix.vhosts'] = 'src/nginx-metrix/vhosts.lua',
 

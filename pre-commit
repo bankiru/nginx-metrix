@@ -10,8 +10,10 @@ fi
 # Redirect output to stderr.
 exec 1>&2
 
-files=$(git diff --cached --name-only -z $against -- '*.lua')
+files=$(git diff --cached --name-only $against -- '*.lua')
 
 [ -z "${files}" ] && exit 0
+
+eval $(luarocks path --bin)
 
 exec luacheck ${files}

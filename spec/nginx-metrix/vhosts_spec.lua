@@ -13,9 +13,10 @@ describe('nginx-metrix.vhosts', function()
     local options_emu = { some_option = 'some_value' }
     local storage_emu = { 'storage' }
 
-    vhosts(options_emu, storage_emu)
+    local result = vhosts(options_emu, storage_emu)
 
     assert.spy(vhosts.init).was_called_with(options_emu, storage_emu)
+    assert.is_equal(vhosts, result)
 
     vhosts.init:revert()
   end)

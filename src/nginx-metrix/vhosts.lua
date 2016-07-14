@@ -91,4 +91,9 @@ function M.reset_active()
 end
 
 
-return setmetatable(M, { __call = function(_, ...) M.init(...) end, })
+return setmetatable(M, {
+  __call = function(_, ...)
+    M.init(...)
+    return M
+  end,
+})

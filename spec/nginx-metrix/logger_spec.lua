@@ -6,14 +6,14 @@ describe('nginx-metrix.logger', function()
   setup(function()
     _G.ngx = {
       STDERR = 'STDERR',
-      EMERG  = 'EMERG',
-      ALERT  = 'ALERT',
-      CRIT   = 'CRIT',
-      ERR    = 'ERR',
-      WARN   = 'WARN',
+      EMERG = 'EMERG',
+      ALERT = 'ALERT',
+      CRIT = 'CRIT',
+      ERR = 'ERR',
+      WARN = 'WARN',
       NOTICE = 'NOTICE',
-      INFO   = 'INFO',
-      DEBUG  = 'DEBUG',
+      INFO = 'INFO',
+      DEBUG = 'DEBUG',
     }
     Logger = require 'nginx-metrix.logger'
   end)
@@ -62,10 +62,10 @@ describe('nginx-metrix.logger', function()
 
     local logger = Logger('test')
     logger:stderr('test-msg-1')
-    logger:stderr('test-msg-2', {some = 'data'})
+    logger:stderr('test-msg-2', { some = 'data' })
 
     assert.spy(Logger.log).was_called_with(logger, _G.ngx.STDERR, 'test-msg-1')
-    assert.spy(Logger.log).was_called_with(logger, _G.ngx.STDERR, 'test-msg-2', {some = 'data'})
+    assert.spy(Logger.log).was_called_with(logger, _G.ngx.STDERR, 'test-msg-2', { some = 'data' })
     assert.spy(Logger.log).was_called(2)
 
     Logger.log:revert()
@@ -76,10 +76,10 @@ describe('nginx-metrix.logger', function()
 
     local logger = Logger('test')
     logger:emerg('test-msg-1')
-    logger:emerg('test-msg-2', {some = 'data'})
+    logger:emerg('test-msg-2', { some = 'data' })
 
     assert.spy(Logger.log).was_called_with(logger, _G.ngx.EMERG, 'test-msg-1')
-    assert.spy(Logger.log).was_called_with(logger, _G.ngx.EMERG, 'test-msg-2', {some = 'data'})
+    assert.spy(Logger.log).was_called_with(logger, _G.ngx.EMERG, 'test-msg-2', { some = 'data' })
     assert.spy(Logger.log).was_called(2)
 
     Logger.log:revert()
@@ -90,10 +90,10 @@ describe('nginx-metrix.logger', function()
 
     local logger = Logger('test')
     logger:alert('test-msg-1')
-    logger:alert('test-msg-2', {some = 'data'})
+    logger:alert('test-msg-2', { some = 'data' })
 
     assert.spy(Logger.log).was_called_with(logger, _G.ngx.ALERT, 'test-msg-1')
-    assert.spy(Logger.log).was_called_with(logger, _G.ngx.ALERT, 'test-msg-2', {some = 'data'})
+    assert.spy(Logger.log).was_called_with(logger, _G.ngx.ALERT, 'test-msg-2', { some = 'data' })
     assert.spy(Logger.log).was_called(2)
 
     Logger.log:revert()
@@ -104,10 +104,10 @@ describe('nginx-metrix.logger', function()
 
     local logger = Logger('test')
     logger:crit('test-msg-1')
-    logger:crit('test-msg-2', {some = 'data'})
+    logger:crit('test-msg-2', { some = 'data' })
 
     assert.spy(Logger.log).was_called_with(logger, _G.ngx.CRIT, 'test-msg-1')
-    assert.spy(Logger.log).was_called_with(logger, _G.ngx.CRIT, 'test-msg-2', {some = 'data'})
+    assert.spy(Logger.log).was_called_with(logger, _G.ngx.CRIT, 'test-msg-2', { some = 'data' })
     assert.spy(Logger.log).was_called(2)
 
     Logger.log:revert()
@@ -118,10 +118,10 @@ describe('nginx-metrix.logger', function()
 
     local logger = Logger('test')
     logger:err('test-msg-1')
-    logger:err('test-msg-2', {some = 'data'})
+    logger:err('test-msg-2', { some = 'data' })
 
     assert.spy(Logger.log).was_called_with(logger, _G.ngx.ERR, 'test-msg-1')
-    assert.spy(Logger.log).was_called_with(logger, _G.ngx.ERR, 'test-msg-2', {some = 'data'})
+    assert.spy(Logger.log).was_called_with(logger, _G.ngx.ERR, 'test-msg-2', { some = 'data' })
     assert.spy(Logger.log).was_called(2)
 
     Logger.log:revert()
@@ -132,10 +132,10 @@ describe('nginx-metrix.logger', function()
 
     local logger = Logger('test')
     logger:warn('test-msg-1')
-    logger:warn('test-msg-2', {some = 'data'})
+    logger:warn('test-msg-2', { some = 'data' })
 
     assert.spy(Logger.log).was_called_with(logger, _G.ngx.WARN, 'test-msg-1')
-    assert.spy(Logger.log).was_called_with(logger, _G.ngx.WARN, 'test-msg-2', {some = 'data'})
+    assert.spy(Logger.log).was_called_with(logger, _G.ngx.WARN, 'test-msg-2', { some = 'data' })
     assert.spy(Logger.log).was_called(2)
 
     Logger.log:revert()
@@ -146,10 +146,10 @@ describe('nginx-metrix.logger', function()
 
     local logger = Logger('test')
     logger:notice('test-msg-1')
-    logger:notice('test-msg-2', {some = 'data'})
+    logger:notice('test-msg-2', { some = 'data' })
 
     assert.spy(Logger.log).was_called_with(logger, _G.ngx.NOTICE, 'test-msg-1')
-    assert.spy(Logger.log).was_called_with(logger, _G.ngx.NOTICE, 'test-msg-2', {some = 'data'})
+    assert.spy(Logger.log).was_called_with(logger, _G.ngx.NOTICE, 'test-msg-2', { some = 'data' })
     assert.spy(Logger.log).was_called(2)
 
     Logger.log:revert()
@@ -160,10 +160,10 @@ describe('nginx-metrix.logger', function()
 
     local logger = Logger('test')
     logger:info('test-msg-1')
-    logger:info('test-msg-2', {some = 'data'})
+    logger:info('test-msg-2', { some = 'data' })
 
     assert.spy(Logger.log).was_called_with(logger, _G.ngx.INFO, 'test-msg-1')
-    assert.spy(Logger.log).was_called_with(logger, _G.ngx.INFO, 'test-msg-2', {some = 'data'})
+    assert.spy(Logger.log).was_called_with(logger, _G.ngx.INFO, 'test-msg-2', { some = 'data' })
     assert.spy(Logger.log).was_called(2)
 
     Logger.log:revert()
@@ -174,10 +174,10 @@ describe('nginx-metrix.logger', function()
 
     local logger = Logger('test')
     logger:debug('test-msg-1')
-    logger:debug('test-msg-2', {some = 'data'})
+    logger:debug('test-msg-2', { some = 'data' })
 
     assert.spy(Logger.log).was_called_with(logger, _G.ngx.DEBUG, 'test-msg-1')
-    assert.spy(Logger.log).was_called_with(logger, _G.ngx.DEBUG, 'test-msg-2', {some = 'data'})
+    assert.spy(Logger.log).was_called_with(logger, _G.ngx.DEBUG, 'test-msg-2', { some = 'data' })
     assert.spy(Logger.log).was_called(2)
 
     Logger.log:revert()

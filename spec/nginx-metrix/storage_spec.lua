@@ -65,30 +65,41 @@ describe('nginx-metrix.storage', function()
   end)
 
   it('normalize key', function()
-    pending('implement it')
-    --    assert.has_error(function()
-    --      storage._normalize_key(nil)
-    --    end,
-    --      'key can not be nil')
-    --
-    --    local normalized_key
-    --
-    --    normalized_key = dict.__private__.normalize_key(777)
-    --    assert.is_string(normalized_key)
-    --    assert.are.equal(normalized_key, '777')
-    --
-    --    normalized_key = dict.__private__.normalize_key({})
-    --    assert.is_string(normalized_key)
-    --    assert.matches('table: 0?x?[0-9a-f]+', normalized_key)
+    assert.has_error(function()
+      storage._normalize_key(nil)
+    end,
+      'key can not be nil')
+
+    local normalized_key
+
+    normalized_key = storage._normalize_key(777)
+    assert.is_string(normalized_key)
+    assert.are.equal(normalized_key, '777')
+
+    normalized_key = storage._normalize_key({})
+    assert.is_string(normalized_key)
+    assert.matches('table: 0?x?[0-9a-f]+', normalized_key)
   end)
 
   it('non existent method', function()
-    pending('implement it')
-    --    assert.has_error(function()
-    --      dict.non_existent_method()
-    --    end,
-    --      "attempt to call field 'non_existent_method' (a nil value)")
-    --    assert.spy(logger.error).was.called_with("dict method 'non_existent_method' does not exists")
-    --    assert.spy(logger.error).was_called(1)
+    assert.has_error(function()
+      storage.non_existent_method()
+    end,
+      "Method 'non_existent_method' does not exists in nginx shared dict.")
+  end)
+
+  it('simple proxy method call to nginx shared dict', function()
+    local shared_dict_bak = storage._shared_dict
+
+    storage._shared_dict = mock({ some_method = function() end })
+
+    assert.has_no_error(function()
+      storage.some_method('arg')
+    end)
+
+    assert.spy(storage._shared_dict.some_method).was_called_with(storage._shared_dict, 'arg')
+    assert.spy(storage._shared_dict.some_method).was_called(1)
+
+    storage._shared_dict = shared_dict_bak
   end)
 end)

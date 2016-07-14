@@ -4,7 +4,7 @@ local serializer = require 'nginx-metrix.serializer'
 
 local M = {}
 
-M._shared_dict = nil
+M._shared_dict = {}
 M._logger = Logger('nginx-metrix.storage')
 
 ---
@@ -12,10 +12,7 @@ M._logger = Logger('nginx-metrix.storage')
 -- @param method
 --
 local index = function(_, method)
-  if M._shared_dict[method] == nil then
-    M._logger.error(("dict method '%s' does not exists"):format(method))
-    return nil
-  end
+  assert(M._shared_dict[method] ~= nil, ("Method '%s' does not exists in nginx shared dict."):format(method))
 
   return function(...)
     return M._shared_dict[method](M._shared_dict, ...)

@@ -90,7 +90,7 @@ function M.reset_active()
   M._active_vhost = nil
 end
 
-
+------------------------------------------------------------------------------
 return setmetatable(M, {
   __call = function(_, ...)
     M.init(...)

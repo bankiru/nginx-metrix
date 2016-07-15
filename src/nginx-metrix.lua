@@ -8,9 +8,11 @@ M._inited = nil
 M._do_not_track = false
 M._builtin_collectors = fun.iter { 'request', 'status', 'upstream' }
 
-M._logger = Logger('nginx-metrix')
+M._logger = Logger()
 M._storage = nil
 M._vhosts = nil
+M._aggregator = nil
+M._scheduler = nil
 
 ---
 -- @param options
@@ -24,6 +26,28 @@ end
 --
 function M.init_vhosts(options)
   M._vhosts = require 'nginx-metrix.vhosts'(options, M._storage)
+end
+
+---
+-- @param options
+--
+function M.init_aggregator(options)
+  M._aggregator = require 'nginx-metrix.aggregator'(options, M._storage)
+end
+
+---
+-- @param options
+--
+function M.init_scheduler(options)
+  M._scheduler = require 'nginx-metrix.scheduler'(options)
+  M._scheduler.attach_action('aggregator.aggregate', M._aggregator.aggregate)
+end
+
+---
+-- @param collector
+--
+function M.register_collector(collector)
+  M._logger:debug('Registering collector', collector)
 end
 
 ---
@@ -54,4 +78,10 @@ function M.init(options)
     end)
 end
 
-return setmetatable(M, { __call = function(_, ...) M.init(...) end, })
+------------------------------------------------------------------------------
+return setmetatable(M, {
+  __call = function(_, ...)
+    M.init(...)
+    return M
+  end,
+})

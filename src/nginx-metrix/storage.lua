@@ -1,11 +1,8 @@
---local fun = require 'fun'
-local Logger = require 'nginx-metrix.logger'
 local serializer = require 'nginx-metrix.serializer'
 
 local M = {}
 
 M._shared_dict = {}
-M._logger = Logger('nginx-metrix.storage')
 
 ---
 -- @param _
@@ -158,6 +155,7 @@ function M.safe_incr(key, value)
   end
 end
 
+------------------------------------------------------------------------------
 return setmetatable(M, {
   __call = function(_, ...)
     M.init(...)

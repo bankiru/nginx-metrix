@@ -44,13 +44,13 @@ describe('nginx-metrix.logger', function()
     local logger = Logger('test')
 
     logger:log(_G.ngx.INFO, 'test-msg-1')
-    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[test] test-msg-1')
+    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[nginx-metrix.test] test-msg-1')
 
     logger:log(_G.ngx.INFO, { 'test-msg-2' })
-    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[test] { "test-msg-2" }')
+    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[nginx-metrix.test] { "test-msg-2" }')
 
     logger:log(_G.ngx.INFO, 'test-msg-3', 'another-arg-1', 'another-arg-2')
-    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[test] test-msg-3 :: { "another-arg-1", "another-arg-2" }')
+    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[nginx-metrix.test] test-msg-3 :: { "another-arg-1", "another-arg-2" }')
 
     assert.spy(_G.ngx.log).was_called(3)
 

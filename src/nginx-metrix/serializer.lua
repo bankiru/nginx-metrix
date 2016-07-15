@@ -4,7 +4,7 @@ local Logger = require 'nginx-metrix.logger'
 local M = {}
 
 M._serialized_table_token = '@@lua_table@@'
-M._logger = Logger('nginx-metrix.serializer')
+M._logger = Logger('serializer')
 
 ---
 -- @param value

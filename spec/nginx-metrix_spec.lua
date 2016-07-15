@@ -18,9 +18,10 @@ describe('nginx-metrix', function()
     stub(nginx_metrix, 'init')
     local options_emu = { some_option = 'some_value' }
 
-    nginx_metrix(options_emu)
+    local module = nginx_metrix(options_emu)
 
     assert.spy(nginx_metrix.init).was_called_with(options_emu)
+    assert.is_equal(nginx_metrix, module)
 
     nginx_metrix.init:revert()
   end)

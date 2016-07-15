@@ -17,7 +17,12 @@ function M:log(level, msg, ...)
     msg = msg .. ' :: ' .. inspect({ ... })
   end
 
-  ngx.log(level, ('[%s] %s'):format(self.module_name or 'nginx-metrix', msg))
+  local module_name = 'nginx-metrix'
+  if self.module_name ~= nil then
+    module_name = module_name .. '.' .. self.module_name
+  end
+
+  ngx.log(level, ('[%s] %s'):format(module_name or 'nginx-metrix', msg))
 end
 
 function M:stderr(...)
@@ -56,6 +61,9 @@ function M:debug(...)
   self:log(ngx.DEBUG, ...)
 end
 
+------------------------------------------------------------------------------
 return setmetatable(M, {
-  __call = function(_, ...) return M.new(...) end,
+  __call = function(_, ...)
+    return M.new(...)
+  end,
 })

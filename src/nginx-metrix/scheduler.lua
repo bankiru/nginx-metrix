@@ -33,7 +33,7 @@ function M.run_actions()
   end)
 end
 
-function M._rechedule(is_starting)
+function M._reschedule(is_starting)
   local ok, err = ngx.timer.at(M._delay, M.run)
 
   if not ok then

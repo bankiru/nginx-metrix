@@ -27,8 +27,10 @@ build = {
   type = "builtin",
   modules = {
     ['nginx-metrix'] = 'src/nginx-metrix.lua',
+    ['nginx-metrix.aggregator'] = 'src/nginx-metrix/aggregator.lua',
     ['nginx-metrix.logger'] = 'src/nginx-metrix/logger.lua',
     ['nginx-metrix.serializer'] = 'src/nginx-metrix/serializer.lua',
+    ['nginx-metrix.scheduler'] = 'src/nginx-metrix/scheduler.lua',
     ['nginx-metrix.storage'] = 'src/nginx-metrix/storage.lua',
     ['nginx-metrix.vhosts'] = 'src/nginx-metrix/vhosts.lua',
 

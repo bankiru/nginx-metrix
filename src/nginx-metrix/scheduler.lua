@@ -13,6 +13,22 @@ function M._worker_id()
   return ngx.worker.id()
 end
 
+---
+-- @param options
+--
+function M.init(options)
+  if options.scheduler_delay ~= nil then
+    assert(type(options.scheduler_delay) == 'number', ('Option "scheduler_delay" must be integer. Got %s.'):format(type(options.scheduler_delay)))
+    assert(options.scheduler_delay > 0, ('Option "scheduler_delay" must be grater then 0. Got %s.'):format(options.scheduler_delay))
+
+    M._delay = options.scheduler_delay
+  end
+end
+
+---
+-- @param name
+-- @param action
+--
 function M.attach_action(name, action)
   M._actions[name] = action
 end

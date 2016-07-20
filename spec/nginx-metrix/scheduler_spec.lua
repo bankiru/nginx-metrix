@@ -67,8 +67,24 @@ describe('nginx-metrix.scheduler', function()
     assert.is_equal('OOOOK', worker_id)
   end)
 
+  it('attach_action failed on non callable', function()
+    assert.has_error(function()
+      scheduler.attach_action('aaaa', 'bbbb')
+    end, 'Action `aaaa` must be callable. Got string.')
+  end)
+
   it('attach_action', function()
-    pending('impelement it')
+    local test_action_1 = function() end
+    assert.has_no_error(function()
+      scheduler.attach_action('test_action_1', test_action_1)
+    end)
+    assert.is_equal(test_action_1, scheduler._actions['test_action_1'])
+
+    local test_action_2 = setmetatable({}, { __call = function() end })
+    assert.has_no_error(function()
+      scheduler.attach_action('test_action_2', test_action_2)
+    end)
+    assert.is_equal(test_action_2, scheduler._actions['test_action_2'])
   end)
 
   it('run_actions', function()

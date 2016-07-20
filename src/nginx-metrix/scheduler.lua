@@ -1,5 +1,6 @@
-local Logger = require 'nginx-metrix.logger'
 local fun = require 'fun'
+local Logger = require 'nginx-metrix.logger'
+local validator = require 'nginx-metrix.validator'
 
 local M = {}
 
@@ -18,8 +19,8 @@ end
 --
 function M.init(options)
   if options.scheduler_delay ~= nil then
-    assert(type(options.scheduler_delay) == 'number', ('Option "scheduler_delay" must be integer. Got %s.'):format(type(options.scheduler_delay)))
-    assert(options.scheduler_delay > 0, ('Option "scheduler_delay" must be grater then 0. Got %s.'):format(options.scheduler_delay))
+    validator.assert_number(options.scheduler_delay, ('Option "scheduler_delay" must be integer. Got %s.'):format(type(options.scheduler_delay)))
+    validator.assert_grater(options.scheduler_delay, 0, ('Option "scheduler_delay" must be grater then 0. Got %s.'):format(options.scheduler_delay))
 
     M._delay = options.scheduler_delay
   end
@@ -30,6 +31,7 @@ end
 -- @param action
 --
 function M.attach_action(name, action)
+  validator.assert_callable(action, ('Action `%s` must be callable. Got %s.'):format(name, type(action)))
   M._actions[name] = action
 end
 

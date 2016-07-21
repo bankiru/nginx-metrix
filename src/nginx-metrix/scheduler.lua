@@ -68,11 +68,11 @@ function M.run(premature)
   local is_starting = premature == nil
 
   if is_starting then
-    M._logger.debug(('Starting on worker #%s'):format(M._worker_id()))
+    M._logger:debug(('Starting on worker #%s'):format(M._worker_id()))
   end
 
   if premature then
-    M._logger.debug(("Exited on worker #%s by premature flag"):format(M._worker_id()))
+    M._logger:debug(("Exited on worker #%s by premature flag"):format(M._worker_id()))
     return false
   end
 
@@ -83,7 +83,7 @@ function M.run(premature)
   end
 
   if is_starting then
-    M._logger.debug(('Started on worker #%s'):format(M._worker_id()))
+    M._logger:debug(('Started on worker #%s'):format(M._worker_id()))
   end
 
   return true

@@ -87,8 +87,30 @@ describe('nginx-metrix.scheduler', function()
     assert.is_equal(test_action_2, scheduler._actions['test_action_2'])
   end)
 
-  it('run_actions', function()
-    pending('impelement it')
+  it('_run_actions', function()
+    local logger_bak = scheduler._logger
+    scheduler._logger = mock({ err = function() end, debug = function() end })
+
+    stub(scheduler, '_worker_id')
+    scheduler._worker_id.on_call_with().returns(13)
+
+    local actions_bak = scheduler._actions
+    scheduler._actions = {
+      mock({ name = 'test action 1', action = function() end }, true),
+      mock({ name = 'test action 2', action = function() end }, true),
+    }
+    scheduler._actions[1].action.on_call_with(13).invokes(function() error('Test error') end)
+    scheduler._actions[2].action.on_call_with(13).returns(nil)
+
+    scheduler._run_actions()
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test action 1` on worker #13')
+    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed scheduled action `test action 1` on worker #13', 'Test error')
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test action 2` on worker #13')
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Finished scheduled action `test action 2` on worker #13')
+
+    scheduler._actions = actions_bak
+    scheduler._worker_id:revert()
+    scheduler._logger = logger_bak
   end)
 
   it('_reschedule failed', function()

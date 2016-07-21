@@ -37,7 +37,7 @@ end
 
 ---
 --
-function M.run_actions()
+function M._run_actions()
   -- TODO: run in separate threads???
   fun.iter(M._actions):each(function(name, action)
     xpcall(function()
@@ -76,7 +76,7 @@ function M.run(premature)
     return false
   end
 
-  M.run_actions()
+  M._run_actions()
 
   if not M._reschedule(is_starting) then
     return false

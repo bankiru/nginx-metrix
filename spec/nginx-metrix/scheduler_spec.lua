@@ -1,6 +1,8 @@
 require('spec.bootstrap')(assert)
 
 describe('nginx-metrix.scheduler', function()
+  local match = require 'luassert.match'
+
   local scheduler
 
   setup(function()
@@ -95,18 +97,20 @@ describe('nginx-metrix.scheduler', function()
     scheduler._worker_id.on_call_with().returns(13)
 
     local actions_bak = scheduler._actions
-    scheduler._actions = {
-      mock({ name = 'test action 1', action = function() end }, true),
-      mock({ name = 'test action 2', action = function() end }, true),
-    }
-    scheduler._actions[1].action.on_call_with(13).invokes(function() error('Test error') end)
-    scheduler._actions[2].action.on_call_with(13).returns(nil)
+    scheduler.attach_action('test_action_1', function() end)
+    scheduler.attach_action('test_action_2', function() end)
+    mock(scheduler._actions, true)
+    scheduler._actions['test_action_1'].on_call_with(13).invokes(function() error('Test error') end)
+    scheduler._actions['test_action_2'].on_call_with(13).returns(nil)
 
     scheduler._run_actions()
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test action 1` on worker #13')
-    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed scheduled action `test action 1` on worker #13', 'Test error')
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test action 2` on worker #13')
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Finished scheduled action `test action 2` on worker #13')
+
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test_action_1` on worker #13')
+    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed scheduled action `test_action_1` on worker #13', match.matches('Test error$'))
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test_action_2` on worker #13')
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Finished scheduled action `test_action_2` on worker #13')
+    assert.spy(scheduler._logger.debug).was_called(3)
+    assert.spy(scheduler._logger.err).was_called(1)
 
     scheduler._actions = actions_bak
     scheduler._worker_id:revert()

@@ -73,7 +73,7 @@ describe('nginx-metrix.scheduler', function()
     end, 'Action `aaaa` must be callable. Got string.')
   end)
 
-  it('attach_action', function()
+  it('attach_action OK', function()
     local test_action_1 = function() end
     assert.has_no_error(function()
       scheduler.attach_action('test_action_1', test_action_1)
@@ -91,8 +91,59 @@ describe('nginx-metrix.scheduler', function()
     pending('impelement it')
   end)
 
-  it('_reschedule', function()
-    pending('impelement it')
+  it('_reschedule failed', function()
+    local logger_bak = scheduler._logger
+
+    scheduler._logger = mock({ err = function() end })
+
+    stub(scheduler, '_worker_id')
+    scheduler._worker_id.on_call_with().returns(7)
+
+    _G.ngx = mock({ timer = { at = function() end } }, true)
+    _G.ngx.timer.at.on_call_with(scheduler._delay, scheduler.run).returns(false, 'Test error')
+
+    assert.has_no_error(function()
+      scheduler._reschedule(true)
+    end)
+    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed to start on worker #7 - failed to create the timer', 'Test error')
+
+    assert.has_no_error(function()
+      scheduler._reschedule(false)
+    end)
+    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed to continue on worker #7 - failed to create the timer', 'Test error')
+
+    assert.spy(scheduler._logger.err).was_called(2)
+    assert.spy(scheduler._worker_id).was_called(2)
+
+    scheduler._worker_id:revert()
+    scheduler._logger = logger_bak
+    _G.ngx = nil
+  end)
+
+  it('_reschedule OK', function()
+    local logger_bak = scheduler._logger
+
+    scheduler._logger = mock({ err = function() end })
+
+    stub(scheduler, '_worker_id')
+    scheduler._worker_id.on_call_with().returns(7)
+
+    _G.ngx = mock({ timer = { at = function() end } }, true)
+    _G.ngx.timer.at.on_call_with(scheduler._delay, scheduler.run).returns(true, nil)
+
+    assert.has_no_error(function()
+      scheduler._reschedule(true)
+    end)
+    assert.has_no_error(function()
+      scheduler._reschedule(false)
+    end)
+
+    assert.spy(scheduler._logger.err).was_not_called()
+    assert.spy(scheduler._worker_id).was_not_called()
+
+    scheduler._worker_id:revert()
+    scheduler._logger = logger_bak
+    _G.ngx = nil
   end)
 
   it('run', function()

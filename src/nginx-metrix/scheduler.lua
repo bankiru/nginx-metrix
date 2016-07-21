@@ -55,7 +55,7 @@ function M._reschedule(is_starting)
   local ok, err = ngx.timer.at(M._delay, M.run)
 
   if not ok then
-    M._logger.error(("Failed to %s on worker #%s - failed to create the timer"):format(is_starting and 'start' or 'continue', M._worker_id()), err)
+    M._logger:err(("Failed to %s on worker #%s - failed to create the timer"):format(is_starting and 'start' or 'continue', M._worker_id()), err)
   end
 
   return ok

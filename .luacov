@@ -9,26 +9,7 @@ return {
     ['nginx-metrix.serializer'] = 'src/nginx-metrix/serializer.lua',
     ['nginx-metrix.scheduler'] = 'src/nginx-metrix/scheduler.lua',
     ['nginx-metrix.storage'] = 'src/nginx-metrix/storage.lua',
+    ['nginx-metrix.validator'] = 'src/nginx-metrix/validator.lua',
     ['nginx-metrix.vhosts'] = 'src/nginx-metrix/vhosts.lua',
-
-    --    ['nginx-metrix.collectors']                        = 'src/collectors.lua',
-    --    ['nginx-metrix.listener']                          = 'src/listener.lua',
-    --    ['nginx-metrix.logger']                            = 'src/logger.lua',
-    --    ['nginx-metrix.scheduler']                         = 'src/scheduler.lua',
-    --    ['nginx-metrix.version']                           = 'src/version.lua',
-    --
-    --    ['nginx-metrix.lib.is']                            = 'src/lib/is.lua',
-    --
-    --    ['nginx-metrix.collectors.request']                = 'src/collectors/request.lua',
-    --    ['nginx-metrix.collectors.status']                 = 'src/collectors/status.lua',
-    --    ['nginx-metrix.collectors.upstream']               = 'src/collectors/upstream.lua',
-    --
-    --    ['nginx-metrix.output.helper']                     = 'src/output/helper.lua',
-    --    ['nginx-metrix.output.renderer']                   = 'src/output/renderer.lua',
-    --
-    --    ['nginx-metrix.storage.collector_wrapper_factory'] = 'src/storage/collector_wrapper_factory.lua',
-    --    ['nginx-metrix.storage.dict']                      = 'src/storage/dict.lua',
-    --    ['nginx-metrix.storage.namespaces']                = 'src/storage/namespaces.lua',
-    --    ['nginx-metrix.storage.serializer']                = 'src/storage/serializer.lua',
   },
 }

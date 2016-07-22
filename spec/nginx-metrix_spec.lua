@@ -31,6 +31,7 @@ describe('nginx-metrix', function()
 
     stub(nginx_metrix, 'init_storage')
     stub(nginx_metrix, 'init_vhosts')
+    stub(nginx_metrix, 'init_scheduler')
     stub(nginx_metrix, 'init_builtin_collectors')
     local options_emu = { some_option = 'some_value' }
 
@@ -38,11 +39,13 @@ describe('nginx-metrix', function()
 
     assert.spy(nginx_metrix.init_storage).was_called_with(options_emu)
     assert.spy(nginx_metrix.init_vhosts).was_called_with(options_emu)
+    assert.spy(nginx_metrix.init_scheduler).was_called_with(options_emu)
     assert.spy(nginx_metrix.init_builtin_collectors).was_called_with(options_emu)
     assert.is_true(nginx_metrix._inited)
 
     nginx_metrix.init_storage:revert()
     nginx_metrix.init_vhosts:revert()
+    nginx_metrix.init_scheduler:revert()
     nginx_metrix.init_builtin_collectors:revert()
   end)
 
@@ -51,6 +54,7 @@ describe('nginx-metrix', function()
 
     stub(nginx_metrix, 'init_storage')
     stub(nginx_metrix, 'init_vhosts')
+    stub(nginx_metrix, 'init_scheduler')
     stub(nginx_metrix, 'init_builtin_collectors')
 
     nginx_metrix.init_storage.on_call_with({}).invokes(function() error('init_storage error') end)
@@ -65,6 +69,7 @@ describe('nginx-metrix', function()
     assert.spy(nginx_metrix.init_storage).was_called_with({})
     assert.spy(nginx_metrix.init_storage).was_called(1)
     assert.spy(nginx_metrix.init_vhosts).was_not_called()
+    assert.spy(nginx_metrix.init_scheduler).was_not_called()
     assert.spy(nginx_metrix.init_builtin_collectors).was_not_called()
     assert.spy(nginx_metrix._logger.err).was_called_with(nginx_metrix._logger, 'Init failed. Metrix disabled.', match.matches('init_storage error'))
     assert.is_false(nginx_metrix._inited)
@@ -72,6 +77,7 @@ describe('nginx-metrix', function()
     nginx_metrix._logger = logger_bak
     nginx_metrix.init_storage:revert()
     nginx_metrix.init_vhosts:revert()
+    nginx_metrix.init_scheduler:revert()
     nginx_metrix.init_builtin_collectors:revert()
   end)
 

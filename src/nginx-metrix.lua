@@ -69,6 +69,7 @@ function M.init(options)
   xpcall(function()
     M.init_storage(options)
     M.init_vhosts(options)
+    M.init_scheduler(options)
     M.init_builtin_collectors(options)
     M._inited = true
   end,

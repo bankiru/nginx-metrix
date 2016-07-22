@@ -22,7 +22,24 @@ describe('nginx-metrix.aggregator', function()
   end)
 
   it('init', function()
-    pending('impelement it')
+    local storage_emu = { 'storage' }
+
+    aggregator._default_window_size = 17
+
+    aggregator.init({}, storage_emu)
+    assert.is_equal(storage_emu, aggregator._storage)
+    assert.is_equal(17, aggregator._default_window_size)
+
+    aggregator._default_window_size = nil
+    aggregator._storage = nil
+
+    aggregator.init({ default_window_size = 19 }, storage_emu)
+
+    assert.is_equal(storage_emu, aggregator._storage)
+    assert.is_equal(19, aggregator._default_window_size)
+
+    aggregator._default_window_size = nil
+    aggregator._storage = nil
   end)
 
   it('aggregate', function()

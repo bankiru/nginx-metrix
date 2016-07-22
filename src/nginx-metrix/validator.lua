@@ -3,7 +3,7 @@ local inspect = require 'inspect'
 local M = {}
 
 function M.is_callable(value)
-  return type(value) == 'function' or type(value) == 'table' and getmetatable(value) and M.is_callable(getmetatable(value).__call)
+  return type(value) == 'function' or type(value) == 'table' and getmetatable(value) and M.is_callable(getmetatable(value).__call) or false
 end
 
 function M.assert_callable(value, message)

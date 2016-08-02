@@ -39,7 +39,7 @@ end
 -- @param options
 --
 function M.init_scheduler(options)
-  M._scheduler = require 'nginx-metrix.scheduler'(options)
+  M._scheduler = require 'nginx-metrix.scheduler'(options, M._storage)
   M._scheduler.attach_action('aggregator.aggregate', M._aggregator.aggregate)
 end
 

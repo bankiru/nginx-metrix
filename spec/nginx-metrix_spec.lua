@@ -137,14 +137,15 @@ describe('nginx-metrix', function()
     local scheduler_emu = mock({ attach_action = function() end })
     local scheduler_module_mock = spy.new(function() return scheduler_emu end)
     local options_emu = { some_option = 'some_value' }
+    local storage_emu = { 'storage' }
 
     package.loaded['nginx-metrix.scheduler'] = scheduler_module_mock
 
     nginx_metrix._aggregator = { aggregate = function() end }
 
-    nginx_metrix.init_scheduler(options_emu)
+    nginx_metrix.init_scheduler(options_emu, storage_emu)
 
-    assert.spy(scheduler_module_mock).was_called_with(options_emu)
+    assert.spy(scheduler_module_mock).was_called_with(options_emu, storage_emu)
     assert.spy(scheduler_module_mock).was_called(1)
     assert.spy(scheduler_emu.attach_action).was_called_with('aggregator.aggregate', nginx_metrix._aggregator.aggregate)
     assert.spy(scheduler_emu.attach_action).was_called(1)

@@ -5,9 +5,10 @@ return {
   modules = {
     ['nginx-metrix'] = 'src/nginx-metrix.lua',
     ['nginx-metrix.aggregator'] = 'src/nginx-metrix/aggregator.lua',
+    ['nginx-metrix.collectors'] = 'src/nginx-metrix/collectors.lua',
     ['nginx-metrix.logger'] = 'src/nginx-metrix/logger.lua',
-    ['nginx-metrix.serializer'] = 'src/nginx-metrix/serializer.lua',
     ['nginx-metrix.scheduler'] = 'src/nginx-metrix/scheduler.lua',
+    ['nginx-metrix.serializer'] = 'src/nginx-metrix/serializer.lua',
     ['nginx-metrix.storage'] = 'src/nginx-metrix/storage.lua',
     ['nginx-metrix.validator'] = 'src/nginx-metrix/validator.lua',
     ['nginx-metrix.vhosts'] = 'src/nginx-metrix/vhosts.lua',

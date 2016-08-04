@@ -10,6 +10,7 @@ M._builtin = fun.iter { 'request', 'status', 'upstream' }
 
 function M.register(collector)
   M._logger:debug('Registering collector', collector)
+  error('Not implemented yet')
 end
 
 ---
@@ -32,6 +33,7 @@ end
 --
 function M.exec_all(phase)
   M._logger:debug('exec_all', phase)
+  error('Not implemented yet')
 end
 
 ------------------------------------------------------------------------------

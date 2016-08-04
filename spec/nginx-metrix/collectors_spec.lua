@@ -21,6 +21,10 @@ describe('nginx-metrix.collectors', function()
     collectors.init:revert()
   end)
 
+  it('registed', function()
+    pending('implement it')
+  end)
+
   it('init', function()
     stub(collectors, 'register')
     local storage_emu = { 'storage' }
@@ -37,7 +41,6 @@ describe('nginx-metrix.collectors', function()
     collectors.init({ skip_register_builtin_collectors = true }, storage_emu)
     assert.spy(collectors.register).was_not_called()
     assert.is_equal(storage_emu, collectors._storage)
-
 
     -- process builtin collectors
     collectors.init({}, storage_emu)

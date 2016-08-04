@@ -40,21 +40,23 @@ describe('nginx-metrix.logger', function()
 
   it('log', function()
     _G.ngx.log = spy.new(function() end)
+    _G.ngx.worker = { id = spy.new(function() return 7 end) }
 
     local logger = Logger('test')
 
     logger:log(_G.ngx.INFO, 'test-msg-1')
-    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[nginx-metrix.test] test-msg-1')
+    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[nginx-metrix.test] [w#7] test-msg-1')
 
     logger:log(_G.ngx.INFO, { 'test-msg-2' })
-    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[nginx-metrix.test] { "test-msg-2" }')
+    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[nginx-metrix.test] [w#7] { "test-msg-2" }')
 
     logger:log(_G.ngx.INFO, 'test-msg-3', 'another-arg-1', 'another-arg-2')
-    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[nginx-metrix.test] test-msg-3 :: { "another-arg-1", "another-arg-2" }')
+    assert.spy(_G.ngx.log).was_called_with(_G.ngx.INFO, '[nginx-metrix.test] [w#7] test-msg-3 :: { "another-arg-1", "another-arg-2" }')
 
     assert.spy(_G.ngx.log).was_called(3)
 
     _G.ngx.log = nil
+    _G.ngx.worker = nil
   end)
 
   it('stderr', function()

@@ -66,14 +66,6 @@ describe('nginx-metrix.scheduler', function()
     scheduler._delay = 1
   end)
 
-  it('_worker_id', function()
-    _G.ngx = mock({ worker = { id = function() return 'OOOOK' end } })
-    local worker_id = scheduler._worker_id()
-    assert.spy(ngx.worker.id).was_called_with()
-    assert.spy(ngx.worker.id).was_called(1)
-    assert.is_equal('OOOOK', worker_id)
-  end)
-
   it('_setup_lock', function()
     local stub_storage = mock({ add = function() return true, 1, 2, 3 end })
 
@@ -107,27 +99,23 @@ describe('nginx-metrix.scheduler', function()
     local logger_bak = scheduler._logger
     scheduler._logger = mock({ err = function() end, debug = function() end })
 
-    stub(scheduler, '_worker_id')
-    scheduler._worker_id.on_call_with().returns(13)
-
     local actions_bak = scheduler._actions
     scheduler.attach_action('test_action_1', function() end)
     scheduler.attach_action('test_action_2', function() end)
     mock(scheduler._actions, true)
-    scheduler._actions['test_action_1'].on_call_with(13).invokes(function() error('Test error') end)
-    scheduler._actions['test_action_2'].on_call_with(13).returns(nil)
+    scheduler._actions['test_action_1'].on_call_with().invokes(function() error('Test error') end)
+    scheduler._actions['test_action_2'].on_call_with().returns(nil)
 
     scheduler._run_actions()
 
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test_action_1` on worker #13.')
-    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed scheduled action `test_action_1` on worker #13.', match.matches('Test error$'))
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test_action_2` on worker #13.')
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Finished scheduled action `test_action_2` on worker #13.')
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test_action_1`.')
+    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed scheduled action `test_action_1`.', match.matches('Test error$'))
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started scheduled action `test_action_2`.')
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Finished scheduled action `test_action_2`.')
     assert.spy(scheduler._logger.debug).was_called(3)
     assert.spy(scheduler._logger.err).was_called(1)
 
     scheduler._actions = actions_bak
-    scheduler._worker_id:revert()
     scheduler._logger = logger_bak
   end)
 
@@ -135,9 +123,6 @@ describe('nginx-metrix.scheduler', function()
     local logger_bak = scheduler._logger
 
     scheduler._logger = mock({ err = function() end })
-
-    stub(scheduler, '_worker_id')
-    scheduler._worker_id.on_call_with().returns(7)
 
     _G.ngx = mock({ timer = { at = function() end } }, true)
     _G.ngx.timer.at.on_call_with(scheduler._delay, scheduler.run).returns(false, 'Test error')
@@ -147,19 +132,17 @@ describe('nginx-metrix.scheduler', function()
     assert.has_no_error(function()
       result = scheduler._reschedule(true)
     end)
-    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed to start on worker #7 - failed to create the timer.', 'Test error')
+    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed to start - can not create the timer.', 'Test error')
     assert.is_false(result)
 
     assert.has_no_error(function()
       result = scheduler._reschedule(false)
     end)
-    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed to continue on worker #7 - failed to create the timer.', 'Test error')
+    assert.spy(scheduler._logger.err).was_called_with(scheduler._logger, 'Failed to continue - can not create the timer.', 'Test error')
     assert.is_false(result)
 
     assert.spy(scheduler._logger.err).was_called(2)
-    assert.spy(scheduler._worker_id).was_called(2)
 
-    scheduler._worker_id:revert()
     scheduler._logger = logger_bak
     _G.ngx = nil
   end)
@@ -168,9 +151,6 @@ describe('nginx-metrix.scheduler', function()
     local logger_bak = scheduler._logger
 
     scheduler._logger = mock({ err = function() end })
-
-    stub(scheduler, '_worker_id')
-    scheduler._worker_id.on_call_with().returns(7)
 
     _G.ngx = mock({ timer = { at = function() end } }, true)
     _G.ngx.timer.at.on_call_with(scheduler._delay, scheduler.run).returns(true, nil)
@@ -188,9 +168,7 @@ describe('nginx-metrix.scheduler', function()
     assert.is_true(result)
 
     assert.spy(scheduler._logger.err).was_not_called()
-    assert.spy(scheduler._worker_id).was_not_called()
 
-    scheduler._worker_id:revert()
     scheduler._logger = logger_bak
     _G.ngx = nil
   end)
@@ -199,9 +177,6 @@ describe('nginx-metrix.scheduler', function()
     local logger_bak = scheduler._logger
 
     scheduler._logger = mock({ debug = function() end })
-
-    stub(scheduler, '_worker_id')
-    scheduler._worker_id.on_call_with().returns(13)
 
     stub(scheduler, '_setup_lock')
     scheduler._setup_lock.on_call_with().returns(true)
@@ -215,13 +190,11 @@ describe('nginx-metrix.scheduler', function()
 
     assert.is_false(result)
     assert.spy(scheduler._reschedule).was_called_with(true)
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Starting on worker #13.')
-    assert.spy(scheduler._worker_id).was_called(1)
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Starting.')
     assert.spy(scheduler._logger.debug).was_called(1)
     assert.spy(scheduler._run_actions).was_called(1)
     assert.spy(scheduler._reschedule).was_called(1)
 
-    scheduler._worker_id:revert()
     scheduler._setup_lock:revert()
     scheduler._reschedule:revert()
     scheduler._run_actions:revert()
@@ -232,9 +205,6 @@ describe('nginx-metrix.scheduler', function()
     local logger_bak = scheduler._logger
 
     scheduler._logger = mock({ debug = function() end })
-
-    stub(scheduler, '_worker_id')
-    scheduler._worker_id.on_call_with().returns(7)
 
     stub(scheduler, '_setup_lock')
     scheduler._setup_lock.on_call_with().returns(true)
@@ -248,14 +218,12 @@ describe('nginx-metrix.scheduler', function()
 
     assert.is_true(result)
     assert.spy(scheduler._reschedule).was_called_with(true)
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Starting on worker #7.')
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started on worker #7.')
-    assert.spy(scheduler._worker_id).was_called(2)
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Starting.')
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Started.')
     assert.spy(scheduler._logger.debug).was_called(2)
     assert.spy(scheduler._run_actions).was_called(1)
     assert.spy(scheduler._reschedule).was_called(1)
 
-    scheduler._worker_id:revert()
     scheduler._setup_lock:revert()
     scheduler._reschedule:revert()
     scheduler._run_actions:revert()
@@ -266,9 +234,6 @@ describe('nginx-metrix.scheduler', function()
     local logger_bak = scheduler._logger
 
     scheduler._logger = mock({ debug = function() end })
-
-    stub(scheduler, '_worker_id')
-    scheduler._worker_id.on_call_with().returns(8)
 
     stub(scheduler, '_setup_lock')
     scheduler._setup_lock.on_call_with().returns(true)
@@ -283,11 +248,9 @@ describe('nginx-metrix.scheduler', function()
     assert.is_true(result)
     assert.spy(scheduler._reschedule).was_called_with(false)
     assert.spy(scheduler._logger.debug).was_not_called()
-    assert.spy(scheduler._worker_id).was_not_called()
     assert.spy(scheduler._run_actions).was_called(1)
     assert.spy(scheduler._reschedule).was_called(1)
 
-    scheduler._worker_id:revert()
     scheduler._setup_lock:revert()
     scheduler._reschedule:revert()
     scheduler._run_actions:revert()
@@ -298,9 +261,6 @@ describe('nginx-metrix.scheduler', function()
     local logger_bak = scheduler._logger
 
     scheduler._logger = mock({ debug = function() end })
-
-    stub(scheduler, '_worker_id')
-    scheduler._worker_id.on_call_with().returns(9)
 
     stub(scheduler, '_setup_lock')
     scheduler._setup_lock.on_call_with().returns(false)
@@ -314,12 +274,10 @@ describe('nginx-metrix.scheduler', function()
 
     assert.is_true(result)
     assert.spy(scheduler._reschedule).was_called_with(false)
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Lock still exists, skipping run actions on worker #9.')
-    assert.spy(scheduler._worker_id).was_called(1)
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Lock still exists, skipping run actions.')
     assert.spy(scheduler._run_actions).was_not_called()
     assert.spy(scheduler._reschedule).was_called(1)
 
-    scheduler._worker_id:revert()
     scheduler._setup_lock:revert()
     scheduler._reschedule:revert()
     scheduler._run_actions:revert()
@@ -330,9 +288,6 @@ describe('nginx-metrix.scheduler', function()
     local logger_bak = scheduler._logger
 
     scheduler._logger = mock({ debug = function() end })
-
-    stub(scheduler, '_worker_id')
-    scheduler._worker_id.on_call_with().returns(9)
 
     stub(scheduler, '_setup_lock')
     scheduler._setup_lock.on_call_with().returns(false)
@@ -345,14 +300,12 @@ describe('nginx-metrix.scheduler', function()
     local result = scheduler.run(true)
 
     assert.is_false(result)
-    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Exited on worker #9 by premature flag.')
+    assert.spy(scheduler._logger.debug).was_called_with(scheduler._logger, 'Exited by premature flag.')
     assert.spy(scheduler._logger.debug).was_called(1)
-    assert.spy(scheduler._worker_id).was_called(1)
     assert.spy(scheduler._setup_lock).was_not_called()
     assert.spy(scheduler._run_actions).was_not_called()
     assert.spy(scheduler._reschedule).was_not_called()
 
-    scheduler._worker_id:revert()
     scheduler._setup_lock:revert()
     scheduler._reschedule:revert()
     scheduler._run_actions:revert()

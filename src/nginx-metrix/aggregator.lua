@@ -20,6 +20,7 @@ end
 
 function M.aggregate(worker_id)
   M._logger:debug(('Aggregating on worker #%s'):format(worker_id))
+  error('Not implemented yet')
 end
 
 ------------------------------------------------------------------------------

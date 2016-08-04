@@ -22,7 +22,7 @@ function M:log(level, msg, ...)
     module_name = module_name .. '.' .. self.module_name
   end
 
-  ngx.log(level, ('[%s] %s'):format(module_name or 'nginx-metrix', msg))
+  ngx.log(level, ('[%s] [w#%s] %s'):format(module_name or 'nginx-metrix', ngx.worker.id(), msg))
 end
 
 function M:stderr(...)

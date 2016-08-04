@@ -18,8 +18,8 @@ function M.init(options, storage)
   end
 end
 
-function M.aggregate(worker_id)
-  M._logger:debug(('Aggregating on worker #%s'):format(worker_id))
+function M.aggregate()
+  M._logger:debug('Aggregating')
   error('Not implemented yet')
 end
 

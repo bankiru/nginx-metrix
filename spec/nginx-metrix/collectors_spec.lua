@@ -51,4 +51,8 @@ describe('nginx-metrix.collectors', function()
     package.loaded['nginx-metrix.collectors.status'] = nil
     package.loaded['nginx-metrix.collectors.upstream'] = nil
   end)
+
+  it('exec_all', function()
+    pending('implement it')
+  end)
 end)

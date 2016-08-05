@@ -97,6 +97,12 @@ function M.handle_ngx_phase()
   M._exec_collectors(phase)
 end
 
+---
+--
+function M.show()
+  error('Not implemented yet')
+end
+
 ------------------------------------------------------------------------------
 return setmetatable(M, {
   __call = function(_, ...)

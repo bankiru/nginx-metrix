@@ -172,4 +172,10 @@ describe('nginx-metrix', function()
 
     package.loaded['nginx-metrix.collectors'] = nil
   end)
+
+  it('show', function()
+    assert.has_no_error(function()
+      nginx_metrix.show()
+    end)
+  end)
 end)

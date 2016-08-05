@@ -18,6 +18,21 @@ function M.init(options, storage)
   end
 end
 
+function M.register_metric(metric)
+  M._logger:debug('register_metric', metric)
+  error('Not implemented yet')
+end
+
+function M.update_metric_value(metric, value)
+  M._logger:debug('update_metric_value', metric, value)
+  error('Not implemented yet')
+end
+
+function M.get_metrics_values()
+  M._logger:debug('get_metrics_values')
+  error('Not implemented yet')
+end
+
 function M.aggregate()
   M._logger:debug('Aggregating')
   error('Not implemented yet')

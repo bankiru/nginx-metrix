@@ -49,4 +49,28 @@ describe('nginx-metrix.aggregator', function()
       aggregator.aggregate()
     end)
   end)
+
+  it('register_metric', function()
+    aggregator._logger = mock({ debug = function() end })
+
+    assert.has_no_error(function()
+      aggregator.register_metric()
+    end)
+  end)
+
+  it('update_metric_value', function()
+    aggregator._logger = mock({ debug = function() end })
+
+    assert.has_no_error(function()
+      aggregator.update_metric_value()
+    end)
+  end)
+
+  it('get_metrics_values', function()
+    aggregator._logger = mock({ debug = function() end })
+
+    assert.has_no_error(function()
+      aggregator.get_metrics_values()
+    end)
+  end)
 end)

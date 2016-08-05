@@ -21,8 +21,12 @@ describe('nginx-metrix.collectors', function()
     collectors.init:revert()
   end)
 
-  it('registed', function()
-    pending('implement it')
+  it('register', function()
+    collectors._logger = mock({ debug = function() end })
+
+    assert.has_no_error(function()
+      collectors.register()
+    end)
   end)
 
   it('init', function()
@@ -56,6 +60,10 @@ describe('nginx-metrix.collectors', function()
   end)
 
   it('exec_all', function()
-    pending('implement it')
+    collectors._logger = mock({ debug = function() end })
+
+    assert.has_no_error(function()
+      collectors.exec_all()
+    end)
   end)
 end)

@@ -43,6 +43,10 @@ describe('nginx-metrix.aggregator', function()
   end)
 
   it('aggregate', function()
-    pending('impelement it')
+    aggregator._logger = mock({ debug = function() end })
+
+    assert.has_no_error(function()
+      aggregator.aggregate()
+    end)
   end)
 end)

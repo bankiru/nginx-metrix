@@ -9,12 +9,28 @@ describe('nginx-metrix.validator', function()
 
   ---------------------------------------------------------------------------
   it('is_callable', function()
-    assert.is_true(validator.is_callable(function() end))
-    assert.is_true(validator.is_callable(setmetatable({}, { __call = function() end })))
-    assert.is_false(validator.is_callable(-1))
-    assert.is_false(validator.is_callable('0'))
-    assert.is_false(validator.is_callable(nil))
-    assert.is_false(validator.is_callable({}))
+    local test_callable
+
+    test_callable = function() end
+    assert.is_true(validator.is_callable(test_callable))
+
+    test_callable = setmetatable({}, { __call = function() end })
+    assert.is_true(validator.is_callable(test_callable))
+
+    test_callable = setmetatable({}, { __call = setmetatable({}, { __call = function() end }) })
+    assert.is_true(validator.is_callable(test_callable))
+
+    test_callable = nil
+    assert.is_false(validator.is_callable(test_callable))
+
+    test_callable = 'string'
+    assert.is_false(validator.is_callable(test_callable))
+
+    test_callable = -1
+    assert.is_false(validator.is_callable(test_callable))
+
+    test_callable = {}
+    assert.is_false(validator.is_callable(test_callable))
   end)
 
   it('assert_callable', function()

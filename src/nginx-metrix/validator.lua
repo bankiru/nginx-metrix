@@ -10,12 +10,20 @@ function M.assert_callable(value, message)
   assert(M.is_callable(value), message or ('Expected callable (function or table with __call). Got %s.'):format(inspect(value)))
 end
 
+function M.is_type(expected_type, value)
+  return type(value) == expected_type
+end
+
+function M.assert_type(expected_type, value, message)
+  assert(M.is_type(expected_type, value), message or ('Expected %s. Got %s.'):format(expected_type, inspect(value)))
+end
+
 function M.is_number(value)
-  return type(value) == 'number'
+  return M.is_type('number', value)
 end
 
 function M.assert_number(value, message)
-  assert(M.is_number(value), message or ('Expected number. Got %s.'):format(inspect(value)))
+  M.assert_type('number', value, message)
 end
 
 function M.is_grater(value, origin)

@@ -10,6 +10,7 @@ describe('nginx-metrix.collectors', function()
   ---------------------------------------------------------------------------
   it('__call', function()
     stub(collectors, 'init')
+
     local options_emu = { some_option = 'some_value' }
     local storage_emu = { 'storage' }
 
@@ -21,12 +22,74 @@ describe('nginx-metrix.collectors', function()
     collectors.init:revert()
   end)
 
-  it('register', function()
-    collectors._logger = mock({ debug = function() end })
+  it('_exists', function()
+    collectors._collectors = {}
+    assert.is_false(collectors._exists('aa'))
+
+    collectors._collectors = { aa = {} }
+    assert.is_false(collectors._exists('aa'))
+
+    collectors._collectors = { aa = {} }
+    assert.is_true(collectors._exists({ name = 'aa' }))
+
+    collectors._collectors = { aa = {} }
+    assert.is_false(collectors._exists({ name = 'bb' }))
+
+    collectors._collectors = {}
+  end)
+
+  it('_validate fails on invalid collector', function()
+    assert.has_error(function()
+      collectors._validate('aa')
+    end, 'Collector must be a table. Got string.')
+
+    assert.has_error(function()
+      collectors._validate({ aaa = 'aaa' })
+    end, 'Collector must contain a `name` property.')
+
+    assert.has_error(function()
+      collectors._validate({ name = 'aaa' })
+    end, 'Collector<aaa>:collect must be a function or callable table. Got: nil.')
+
+    assert.has_error(function()
+      collectors._validate({ name = 'aaa', collect = function() end })
+    end, 'Collector<aaa>:render must be a function or callable table. Got: nil.')
 
     assert.has_no_error(function()
-      collectors.register()
+      collectors._validate({ name = 'aaa', collect = function() end, render = function() end })
     end)
+  end)
+
+  it('register fails on invalid collector', function()
+    stub(collectors, '_validate')
+
+    collectors._validate.on_call_with({}).invokes(function() error('Invalid collector') end)
+
+    assert.has_error(function()
+      collectors.register({})
+    end, 'Invalid collector')
+
+    assert.spy(collectors._validate).was_called_with({})
+    assert.spy(collectors._validate).was_called(1)
+
+    collectors._validate:revert()
+  end)
+
+  it('register fails on existing collector', function()
+    stub(collectors, '_exists')
+
+    local test_collector = { name = 'aa', collect = function() end, render = function() end }
+
+    collectors._exists.on_call_with(test_collector).returns(true)
+
+    assert.has_error(function()
+      collectors.register(test_collector)
+    end, 'Collector<aa> already exists.')
+
+    assert.spy(collectors._exists).was_called_with(test_collector)
+    assert.spy(collectors._exists).was_called(1)
+
+    collectors._exists:revert()
   end)
 
   it('init', function()
@@ -60,10 +123,18 @@ describe('nginx-metrix.collectors', function()
   end)
 
   it('exec_all', function()
+    collectors._collectors = { test = mock({ name = 'test', collect = function() end }) }
+
     collectors._logger = mock({ debug = function() end })
 
-    assert.has_no_error(function()
-      collectors.exec_all()
-    end)
+    collectors.exec_all('test')
+
+    assert.spy(collectors._logger.debug).was_called_with(collectors._logger, 'Collector<test> called on phase `test`.')
+    assert.spy(collectors._logger.debug).was_called(1)
+
+    assert.spy(collectors._collectors.test.collect).was_called_with(collectors._collectors.test, 'test')
+    assert.spy(collectors._collectors.test.collect).was_called(1)
+
+    collectors._collectors = {}
   end)
 end)

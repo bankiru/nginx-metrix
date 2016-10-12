@@ -40,7 +40,6 @@ describe('storage.window', function()
     _G.ngx.md5.on_call_with(match._).returns('0123456789AbCdEf0123456789aBcDeF')
 
     local key = Window.__private__.WindowItem.create_key('payload')
-    assert.spy(_G.ngx.now).was.called(2)
     assert.spy(_G.ngx.md5).was.called_with(match.has_match('^%d+%.%d+ %d+%.%d+$'))
     assert.spy(_G.ngx.md5).was.called(1)
     assert.is_equals(32, key:len())
@@ -91,9 +90,9 @@ describe('storage.window', function()
 
   it('WindowItem restore', function()
     dict_mock.get.on_call_with('WindowItem^NINEXISTENTITEMKEY').returns(nil, 0)
-    local windowItem = Window.__private__.WindowItem.restore('NINEXISTENTITEMKEY')
+    local windowItem0 = Window.__private__.WindowItem.restore('NINEXISTENTITEMKEY')
     assert.spy(dict_mock.get).was.called_with('WindowItem^NINEXISTENTITEMKEY')
-    assert.is_nil(windowItem)
+    assert.is_nil(windowItem0)
 
     dict_mock.get.on_call_with('WindowItem^0123456789AbCdEf0123456789aBcDeF').returns({ _key = '0123456789AbCdEf0123456789aBcDeF', _payload = 'payload', _next = nil })
     local windowItem = Window.__private__.WindowItem.restore('0123456789AbCdEf0123456789aBcDeF')
@@ -253,11 +252,11 @@ describe('storage.window', function()
     local sqs = stub.new(Window, 'store')
     local sqp = stub.new(Window, 'pop')
 
-    local sik = stub.new(Window.__private__.WindowItem, 'create_key')
-    sik.on_call_with().returns('11111111111111111111111111111111')
+    local sik0 = stub.new(Window.__private__.WindowItem, 'create_key')
+    sik0.on_call_with().returns('11111111111111111111111111111111')
     local item_mock = Window.__private__.WindowItem.new('payload')
     spy.on(item_mock, 'next')
-    sik:revert();
+    sik0:revert();
 
     local sik = stub.new(Window.__private__.WindowItem, 'create_key')
     sir.on_call_with('11111111111111111111111111111111').returns(item_mock)

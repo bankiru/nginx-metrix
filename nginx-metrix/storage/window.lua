@@ -1,6 +1,8 @@
 local math = require 'math'
 local storage_dict = require 'nginx-metrix.storage.dict'
 
+math.randomseed(ngx and ngx.now() or os.time())
+
 -- Window Item --
 local WindowItem = {}
 WindowItem.__index = WindowItem
@@ -8,7 +10,6 @@ WindowItem.__index = WindowItem
 ---
 --
 function WindowItem.create_key()
-  math.randomseed(ngx.now())
   return ngx.md5(string.format('%.3f %.12f', ngx.now(), math.random()))
 end
 
